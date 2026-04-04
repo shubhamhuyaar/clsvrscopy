@@ -1,9 +1,13 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Crosshair, Cpu, Terminal, Sword } from 'lucide-react';
 import { Auth } from '@/components/Auth';
+
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
 
 export default function Home() {
   const router = useRouter();
@@ -25,7 +29,7 @@ export default function Home() {
     
     // Create match via backend REST endpoint
     try {
-      const res = await fetch('http://localhost:3001/room/create', {
+      const res = await fetch(`${SOCKET_URL}/room/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
