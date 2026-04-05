@@ -73,12 +73,15 @@ const PROBLEMS = [
 // ── Server ─────────────────────────────────────────────────────────────────
 
 const app = express();
-app.use(cors({ origin: process.env.CLIENT_ORIGIN || "http://localhost:3000" }));
+
+// Use wildcard CORS to allow all connections dynamically (for easy Vercel deployments)
+const corsOptions = { origin: "*" };
+app.use(cors(corsOptions));
 app.use(express.json());
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-  cors: { origin: process.env.CLIENT_ORIGIN || "http://localhost:3000", methods: ["GET", "POST"] },
+  cors: { origin: "*", methods: ["GET", "POST"] },
 });
 
 // ── Helpers ────────────────────────────────────────────────────────────────
