@@ -27,7 +27,14 @@ export default function HomePage() {
   }, []);
 
   async function fetchStats(uid: string) {
-    try { const r = await fetch(`${API_URL}/profile/${uid}`, { cache: 'no-store' }); if (r.ok) setPlayerStats(await r.json()); } catch { }
+    try { 
+      const r = await fetch(`${API_URL}/profile/${uid}`, { cache: 'no-store' }); 
+      if (r.ok) {
+        const data = await r.json();
+        setPlayerStats(data);
+        if (data.avatar_url) localStorage.setItem('cw_avatar_url', data.avatar_url);
+      }
+    } catch { }
   }
 
   async function handleAuth(e: React.FormEvent) {
@@ -41,6 +48,7 @@ export default function HomePage() {
       if (!res.ok) { setError(data.error || 'Authentication failed'); setLoading(false); return; }
       localStorage.setItem('cw_userId', data.userId);
       localStorage.setItem('cw_username', data.username);
+      if (data.avatar_url) localStorage.setItem('cw_avatar_url', data.avatar_url);
       setUserId(data.userId); setLoggedUsername(data.username);
       setPlayerStats({ elo: data.elo || 1000, wins: 0, losses: 0 });
       fetchStats(data.userId); setLoading(false);
@@ -48,7 +56,7 @@ export default function HomePage() {
   }
 
   function handleLogout() {
-    localStorage.removeItem('cw_userId'); localStorage.removeItem('cw_username');
+    localStorage.removeItem('cw_userId'); localStorage.removeItem('cw_username'); localStorage.removeItem('cw_avatar_url');
     setUserId(null); setPlayerStats(null); setUsername(''); setPassword(''); setLoggedUsername('');
   }
 

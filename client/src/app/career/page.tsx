@@ -42,6 +42,7 @@ export default function CareerPage() {
       });
       if (res.ok) {
         setProfile(p => p ? { ...p, avatar_url: url } : p);
+        localStorage.setItem('cw_avatar_url', url);
         setAvatarMenuOpen(false);
       } else {
         console.error("Failed to update avatar");

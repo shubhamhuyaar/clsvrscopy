@@ -859,10 +859,10 @@ io.on("connection", (socket: Socket) => {
     socket.to(nodeRoom).emit("node_activity", { username, status: "online" });
   });
 
-  socket.on("node_chat_message", ({ code, username, message }: { code: string; username: string; message: string }) => {
+  socket.on("node_chat_message", ({ code, username, message, avatar_url }: { code: string; username: string; message: string; avatar_url?: string }) => {
     const nodeRoom = `node_${code}`;
     const safe = message.slice(0, 500).replace(/</g, "&lt;");
-    io.to(nodeRoom).emit("node_chat_message", { username, message: safe, timestamp: Date.now() });
+    io.to(nodeRoom).emit("node_chat_message", { username, message: safe, timestamp: Date.now(), avatar_url });
   });
 
   socket.on("node_broadcast_update", ({ code }: { code: string }) => {

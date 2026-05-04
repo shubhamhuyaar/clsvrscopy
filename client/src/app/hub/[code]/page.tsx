@@ -9,6 +9,7 @@ interface HubMember {
   username: string;
   role: 'ADMIN' | 'USER';
   elo: number;
+  avatar_url?: string;
 }
 
 interface Broadcast {
@@ -16,12 +17,14 @@ interface Broadcast {
   content: string;
   author: string;
   createdAt: string;
+  avatar_url?: string;
 }
 
 interface ChatMessage {
   username: string;
   message: string;
   timestamp: number;
+  avatar_url?: string;
 }
 
 export default function HubDashboard({ params }: { params: Promise<{ code: string }> }) {
@@ -146,7 +149,8 @@ export default function HubDashboard({ params }: { params: Promise<{ code: strin
   function sendChat(e: React.FormEvent) {
     e.preventDefault();
     if (!chatInput.trim() || !socketRef.current) return;
-    socketRef.current.emit('node_chat_message', { code: nodeCode, username, message: chatInput.trim() });
+    const myAvatar = localStorage.getItem('cw_avatar_url') || '';
+    socketRef.current.emit('node_chat_message', { code: nodeCode, username, message: chatInput.trim(), avatar_url: myAvatar });
     setChatInput('');
   }
 
@@ -202,8 +206,8 @@ export default function HubDashboard({ params }: { params: Promise<{ code: strin
                        return (
                          <div key={m.userId} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '12px', borderRadius: 12, background: isOnline ? 'rgba(74,222,128,0.05)' : 'transparent', border: '1px solid transparent', cursor: 'default' }}>
                             <div style={{ position: 'relative' }}>
-                               <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(194,196,232,0.1)', border: '1px solid rgba(194,196,232,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontWeight: 700, fontSize: 16 }}>
-                                 {m.username.charAt(0).toUpperCase()}
+                               <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(194,196,232,0.1)', border: '1px solid rgba(194,196,232,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontWeight: 700, fontSize: 16, overflow: 'hidden' }}>
+                                 {m.avatar_url ? <img src={m.avatar_url} alt={m.username} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : m.username.charAt(0).toUpperCase()}
                                </div>
                                <div style={{ position: 'absolute', bottom: -2, right: -2, width: 14, height: 14, border: '2px solid var(--background)', borderRadius: '50%', background: isOnline ? '#4ade80' : 'var(--outline)' }} />
                             </div>
@@ -240,11 +244,16 @@ export default function HubDashboard({ params }: { params: Promise<{ code: strin
                 ) : (
                   broadcasts.map(b => (
                     <div key={b.id} style={{ background: 'rgba(0,0,0,0.3)', borderRadius: 16, padding: 24, borderLeft: '4px solid var(--tertiary)', border: '1px solid rgba(255,255,255,0.05)', position: 'relative' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 16, borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: 12 }}>
-                         <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--primary)' }}>{b.author}</span>
-                         <span style={{ fontSize: 11, color: 'var(--secondary)', fontFamily: 'var(--font-mono)' }}>
-                            {new Date(b.createdAt).toLocaleDateString()} @ {new Date(b.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                         </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: 12 }}>
+                         <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', background: 'rgba(255,255,255,0.05)', flexShrink: 0 }}>
+                            {b.avatar_url ? <img src={b.avatar_url} alt={b.author} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:14, color:'var(--primary)' }}>{b.author.charAt(0)}</div>}
+                         </div>
+                         <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--primary)' }}>{b.author}</span>
+                            <span style={{ fontSize: 11, color: 'var(--secondary)', fontFamily: 'var(--font-mono)' }}>
+                                {new Date(b.createdAt).toLocaleDateString()} @ {new Date(b.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </span>
+                         </div>
                       </div>
                       <div style={{ color: 'var(--on-surface)', fontSize: 15, whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{b.content}</div>
                     </div>
@@ -293,8 +302,8 @@ export default function HubDashboard({ params }: { params: Promise<{ code: strin
                    const isMe = chat.username === username;
                    return (
                      <div key={i} style={{ display: 'flex', gap: 16 }}>
-                       <div style={{ width: 44, height: 44, flexShrink: 0, borderRadius: '50%', background: isMe ? 'var(--primary)' : 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isMe ? 'var(--on-primary)' : 'var(--on-surface)', fontWeight: 700, fontSize: 18 }}>
-                         {chat.username.charAt(0).toUpperCase()}
+                       <div style={{ width: 44, height: 44, flexShrink: 0, borderRadius: '50%', background: isMe ? 'var(--primary)' : 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isMe ? 'var(--on-primary)' : 'var(--on-surface)', fontWeight: 700, fontSize: 18, overflow: 'hidden' }}>
+                         {chat.avatar_url ? <img src={chat.avatar_url} alt={chat.username} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : chat.username.charAt(0).toUpperCase()}
                        </div>
                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
                          <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 4 }}>

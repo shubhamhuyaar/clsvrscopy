@@ -52,6 +52,19 @@ export function TopNav({ active }: { active: string }) {
 
         {/* Desktop Action & Mobile Toggle */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, zIndex: 60 }}>
+          {typeof window !== 'undefined' && localStorage.getItem('cw_userId') && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginRight: 8 }}>
+              <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(167,169,204,0.1)', border: '1px solid rgba(167,169,204,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', cursor: 'pointer' }} onClick={() => router.push('/career')}>
+                {typeof window !== 'undefined' && localStorage.getItem('cw_avatar_url') ? (
+                  <img src={localStorage.getItem('cw_avatar_url')!} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--primary)' }}>
+                    {localStorage.getItem('cw_username')?.charAt(0).toUpperCase() || 'U'}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
           <button className="hide-on-mobile" onClick={() => router.push('/')} style={{ padding: '10px 24px', background: 'var(--primary)', color: 'var(--on-primary)', fontFamily: 'var(--font-sans)', fontSize: 14, fontWeight: 600, border: 'none', borderRadius: 10, cursor: 'pointer', letterSpacing: '-0.01em' }}>Battle Now</button>
           
           <button className="hide-on-desktop" style={{ justifyContent: 'center', alignItems: 'center', width: 40, height: 40, borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', cursor: 'pointer' }} onClick={() => setMenuOpen(!menuOpen)}>
