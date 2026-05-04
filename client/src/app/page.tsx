@@ -15,8 +15,8 @@ export function TopNav({ active }: { active: string }) {
   return (
     <header style={{
       position: 'fixed', top: 0, width: '100%', zIndex: 50,
-      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      padding: '0 32px', height: 80,
+      display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center',
+      padding: '0 32px', minHeight: 80,
       background: 'rgba(14,14,16,0.60)',
       backdropFilter: 'blur(40px)',
       borderBottom: '1px solid rgba(255,255,255,0.05)',
@@ -28,7 +28,7 @@ export function TopNav({ active }: { active: string }) {
       </div>
 
       {/* Nav links */}
-      <nav style={{ display: 'flex', alignItems: 'center', gap: 32, height: '100%' }}>
+      <nav style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '16px 32px', height: '100%' }}>
         {links.map(link => {
           const isActive = active === link.id;
           return (
@@ -162,7 +162,7 @@ export default function HomePage() {
           </section>
 
           {/* Feature grid */}
-          <section style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, width: '100%' }}>
+          <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16, width: '100%' }}>
             {[
               { icon: 'science', title: 'Laboratory Alpha', desc: 'Synthesize algorithms and mod your code arsenal using rare problem sets harvested from live duels.' },
               { icon: 'leaderboard', title: 'Global Rankings', desc: 'Compete against the world\'s best. Claim seasonal rewards and the ultimate title of Arena Champion.' },
@@ -243,7 +243,7 @@ export default function HomePage() {
 
           {/* Stat cards */}
           {playerStats && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 40 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 40 }}>
               {[
                 { label: 'Combat Rating', value: playerStats.elo, color: 'var(--primary)' },
                 { label: 'Victories', value: playerStats.wins, color: 'var(--tertiary)' },
@@ -277,7 +277,7 @@ export default function HomePage() {
           </div>
 
           {/* Quick nav */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginTop: 24 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 16, marginTop: 24 }}>
             {[
               { label: 'Rankings', desc: 'See where you stand globally', path: '/leaderboard', icon: 'leaderboard' },
               { label: 'Career', desc: 'Your match history & stats', path: '/career', icon: 'person' },
@@ -301,9 +301,9 @@ export default function HomePage() {
       )}
 
       {/* Footer */}
-      <footer style={{ padding: '24px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(15,15,16,0.2)', backdropFilter: 'blur(20px)', borderTop: '1px solid rgba(255,255,255,0.05)', position: 'relative', zIndex: 1 }}>
+      <footer style={{ padding: '24px 32px', display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between', alignItems: 'center', background: 'rgba(15,15,16,0.2)', backdropFilter: 'blur(20px)', borderTop: '1px solid rgba(255,255,255,0.05)', position: 'relative', zIndex: 1 }}>
         <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--secondary)' }}>© 2024 CLASHVERS. PROTOCOL INITIATED.</div>
-        <div style={{ display: 'flex', gap: 32 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px 32px' }}>
           {['Privacy Grid', 'Terms of Combat', 'API Access', 'Neural Link'].map(l => (
             <a key={l} href="#" style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--outline)', textDecoration: 'none', letterSpacing: '0.08em' }}>{l}</a>
           ))}

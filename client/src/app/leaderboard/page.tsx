@@ -14,9 +14,9 @@ function TopNav({ active }: { active: string }) {
     { id: 'hub', label: 'Hub', path: '/hub' },
   ];
   return (
-    <header style={{ position: 'fixed', top: 0, width: '100%', zIndex: 50, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 32px', height: 80, background: 'rgba(14,14,16,0.60)', backdropFilter: 'blur(40px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+    <header style={{ position: 'fixed', top: 0, width: '100%', zIndex: 50, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', padding: '0 32px', minHeight: 80, background: 'rgba(14,14,16,0.60)', backdropFilter: 'blur(40px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
       <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em', color: '#A7A9CC', fontStyle: 'italic', cursor: 'pointer' }} onClick={() => router.push('/')}>Clashvers</div>
-      <nav style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+      <nav style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '16px 32px' }}>
         {links.map(link => {
           const isActive = active === link.id;
           return (
@@ -79,7 +79,7 @@ export default function LeaderboardPage() {
           <>
             {/* ── Podium ── exact Stitch pedestal layout */}
             {top3.length > 0 && (
-              <section style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: 32, marginBottom: 96, height: 440 }}>
+              <section style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-end', gap: 32, marginBottom: 96, minHeight: 440 }}>
                 {/* Rank 2 */}
                 {top3[1] && (
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -132,7 +132,7 @@ export default function LeaderboardPage() {
             {/* ── Table ── exact Stitch grid layout */}
             <section className="glass-panel" style={{ maxWidth: 900, margin: '0 auto', borderRadius: 24, overflow: 'hidden', boxShadow: '0 25px 50px rgba(0,0,0,0.4)' }}>
               {/* Table header */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 6fr 2fr 3fr', padding: '24px 40px', borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', padding: '24px 40px', borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)' }}>
                 {['Rank', 'Player', 'Win Rate', 'Combat Rating'].map((h, i) => (
                   <div key={h} style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--secondary)', fontWeight: 700, textAlign: i >= 2 ? 'right' : 'left' }}>{h}</div>
                 ))}
@@ -146,7 +146,7 @@ export default function LeaderboardPage() {
                   const total = p.wins + p.losses;
                   const wr = total > 0 ? ((p.wins / total) * 100).toFixed(1) : '0.0';
                   return (
-                    <div key={p.id} style={{ display: 'grid', gridTemplateColumns: '1fr 6fr 2fr 3fr', padding: '20px 40px', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.1s', cursor: 'default' }}
+                    <div key={p.id} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', padding: '20px 40px', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.1s', cursor: 'default' }}
                       onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
                       onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                       <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--secondary)', fontSize: 14 }}>#{String(globalRank).padStart(2, '0')}</div>

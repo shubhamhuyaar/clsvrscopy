@@ -169,48 +169,49 @@ export default function HubDashboard({ params }: { params: Promise<{ code: strin
   }
 
   return (
-    <div className="h-full flex flex-col overflow-hidden text-[#dcddde] font-sans" style={{ background: '#36393f' }}>
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--background)', overflow: 'hidden', display: 'flex', flexDirection: 'column', fontFamily: 'var(--font-sans)' }}>
        {/* HEADER */}
-       <header className="h-14 shrink-0 flex items-center justify-between px-6 shadow-md relative z-50" style={{ background: '#2f3136' }}>
-          <div className="flex items-center gap-4">
-             <button onClick={() => router.push('/hub')} className="text-[#8e9297] hover:text-white transition-colors pb-1 text-xl font-black">&lt;</button>
-             <h1 className="text-lg font-bold text-white tracking-wide" style={{ wordBreak: 'break-all' }}>{nodeData?.name}</h1>
+       <header style={{ minHeight: 80, display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', padding: '16px 32px', background: 'rgba(14,14,16,0.60)', backdropFilter: 'blur(40px)', borderBottom: '1px solid rgba(255,255,255,0.05)', flexShrink: 0, position: 'relative', zIndex: 50, gap: 16 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 24 }}>
+             <button onClick={() => router.push('/hub')} style={{ background: 'transparent', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer', fontSize: 24, padding: 0 }}>&larr;</button>
+             <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--on-surface)', letterSpacing: '-0.02em', wordBreak: 'break-all' }}>{nodeData?.name}</h1>
              {mRole === 'ADMIN' && (
-                <div className="ml-2 flex items-center gap-2 bg-[#202225] px-3 py-1 rounded border border-[#18191c]">
-                   <span className="text-[10px] text-[#72767d] uppercase tracking-wider font-bold">Invite Credential:</span>
-                   <span className="text-sm font-mono text-[#5865F2] font-black tracking-widest">{nodeCode}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'rgba(255,255,255,0.05)', padding: '6px 16px', borderRadius: 9999, border: '1px solid rgba(255,255,255,0.1)' }}>
+                   <span style={{ fontSize: 10, color: 'var(--secondary)', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 600 }}>Invite Credential</span>
+                   <span style={{ fontSize: 14, fontFamily: 'var(--font-mono)', color: 'var(--primary)', fontWeight: 700, letterSpacing: '0.1em' }}>{nodeCode}</span>
                 </div>
              )}
           </div>
           
-          <div className="relative">
+          <div style={{ position: 'relative' }}>
              <button 
                onClick={() => setShowMembers(!showMembers)} 
-               className="px-4 py-1.5 rounded bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold text-sm transition-colors shadow"
+               style={{ padding: '10px 24px', borderRadius: 12, background: 'rgba(167,169,204,0.1)', color: 'var(--primary)', fontWeight: 600, fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.05em', border: '1px solid rgba(167,169,204,0.25)', cursor: 'pointer' }}
              >
-                MEMBERS
+                Members ({members.length})
              </button>
              
              {showMembers && (
-               <div className="absolute top-10 right-0 w-72 bg-[#2f3136] rounded-md shadow-2xl border border-[#202225] flex flex-col overflow-hidden z-50 max-h-[70vh]">
-                  <div className="p-3 border-b border-[#202225] bg-[#202225] text-xs font-bold text-[#b9bbbe] uppercase tracking-wider">
-                     Members — {members.length}
+               <div style={{ position: 'absolute', top: 56, right: 0, width: 320, background: 'rgba(19,19,21,0.95)', backdropFilter: 'blur(40px)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 50, maxHeight: '70vh', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+                  <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.02)', fontSize: 11, fontWeight: 700, color: 'var(--secondary)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>
+                     Alliance Members
                   </div>
-                  <div className="flex-1 overflow-y-auto p-2">
+                  <div style={{ flex: 1, overflowY: 'auto', padding: 12, display: 'flex', flexDirection: 'column', gap: 4 }}>
                      {members.map(m => {
                        const isOnline = activeUsers.has(m.username) || m.username === username;
                        return (
-                         <div key={m.userId} className="flex items-center gap-3 p-2 rounded hover:bg-[#3ba55c]/10 cursor-default transition-colors">
-                            <div className="relative">
-                               <div className="w-8 h-8 rounded-full bg-[#5865F2] flex items-center justify-center text-white font-bold select-none">
+                         <div key={m.userId} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '12px', borderRadius: 12, background: isOnline ? 'rgba(74,222,128,0.05)' : 'transparent', border: '1px solid transparent', cursor: 'default' }}>
+                            <div style={{ position: 'relative' }}>
+                               <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(194,196,232,0.1)', border: '1px solid rgba(194,196,232,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontWeight: 700, fontSize: 16 }}>
                                  {m.username.charAt(0).toUpperCase()}
                                </div>
-                               <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 border-2 border-[#2f3136] rounded-full ${isOnline ? 'bg-[#3ba55c]' : 'bg-[#747f8d]'}`} />
+                               <div style={{ position: 'absolute', bottom: -2, right: -2, width: 14, height: 14, border: '2px solid var(--background)', borderRadius: '50%', background: isOnline ? '#4ade80' : 'var(--outline)' }} />
                             </div>
-                            <div className="flex flex-col flex-1 min-w-0">
-                               <div className="flex items-center justify-between">
-                                 <span className="text-sm font-semibold text-slate-200 truncate">{m.username}</span>
-                                 {m.role === 'ADMIN' && <span className="text-[9px] text-[#faa61a] font-bold bg-[#faa61a]/10 px-1 rounded">ADMIN</span>}
+                            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
+                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                 <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--on-surface)' }}>{m.username}</span>
+                                 {m.role === 'ADMIN' && <span style={{ fontSize: 10, color: 'var(--tertiary)', fontWeight: 800, background: 'rgba(220,197,145,0.15)', padding: '2px 8px', borderRadius: 9999, letterSpacing: '0.05em' }}>ADMIN</span>}
                                </div>
                             </div>
                          </div>
@@ -222,86 +223,90 @@ export default function HubDashboard({ params }: { params: Promise<{ code: strin
           </div>
        </header>
 
-       {/* MAIN GRID */}
-       <div className="flex-1 flex overflow-hidden bg-[#36393f]">
+       {/* MAIN CONTENT */}
+       <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', overflowY: 'auto', padding: 32, gap: 32, minHeight: 0 }}>
           
           {/* LEFT SIDE: EVENTS SECTION */}
-          <div className="w-1/2 flex flex-col items-center max-w-3xl p-6 relative h-full">
-             <div className="w-full flex-1 flex flex-col bg-[#2f3136] rounded-lg overflow-hidden shadow-lg border border-[#202225]">
-                <div className="p-4 bg-[#202225] border-b border-[#18191c]">
-                   <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                     <span className="text-[#5865F2]">📅</span> Community Events
-                   </h2>
-                   <p className="text-xs text-[#b9bbbe] mt-1">Updates and announcements mapped from Admins.</p>
-                </div>
-                
-                <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
-                   {broadcasts.length === 0 ? (
-                     <div className="text-center text-[#72767d] italic mt-10">No events found in this community.</div>
-                   ) : (
-                     broadcasts.map(b => (
-                       <div key={b.id} className="bg-[#36393f] rounded-md p-4 border border-[#202225] shadow drop-shadow-md relative">
-                         <div className="flex flex-col items-start gap-1 mb-3 border-b border-[#4f545c] pb-2">
-                            <span className="text-[14px] font-bold text-[#5865F2]">{b.author}</span>
-                            <span className="text-[10px] text-[#72767d] font-semibold">
-                               {new Date(b.createdAt).toLocaleDateString()} at {new Date(b.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                            </span>
-                         </div>
-                         <div className="text-[#dcddde] text-sm whitespace-pre-wrap leading-relaxed">{b.content}</div>
-                       </div>
-                     ))
-                   )}
-                </div>
-
-                {/* ADMIN EVENT POST BOX */}
-                {mRole === 'ADMIN' && (
-                  <div className="p-4 bg-[#202225] border-t border-[#18191c]">
-                     <form onSubmit={handleBroadcast} className="flex gap-2">
-                       <input 
-                         type="text" 
-                         value={broadcastInput}
-                         onChange={e => setBroadcastInput(e.target.value)}
-                         placeholder="Announce a new event..."
-                         className="flex-1 bg-[#40444b] rounded px-4 py-2 text-sm text-[#dcddde] placeholder-[#72767d] outline-none transition-all"
-                       />
-                       <button type="submit" disabled={!broadcastInput.trim()} className="px-5 bg-[#3ba55c] hover:bg-[#349251] disabled:opacity-50 disabled:hover:bg-[#3ba55c] text-white font-bold rounded text-sm transition-colors shadow">Post Event</button>
-                     </form>
-                  </div>
+          <div style={{ flex: '1 1 400px', display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(40px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 24, overflow: 'hidden', maxHeight: '80vh' }}>
+             <div style={{ padding: '24px 32px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--on-surface)', display: 'flex', alignItems: 'center', gap: 12, letterSpacing: '-0.02em' }}>
+                  <span className="material-symbols-outlined" style={{ color: 'var(--tertiary)' }}>event_note</span> Community Logs
+                </h2>
+                <p style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginTop: 8 }}>Official transmissions and protocol updates.</p>
+             </div>
+             
+             <div style={{ flex: 1, overflowY: 'auto', padding: 32, display: 'flex', flexDirection: 'column', gap: 24 }}>
+                {broadcasts.length === 0 ? (
+                  <div style={{ textAlign: 'center', color: 'var(--on-surface-variant)', fontSize: 13, fontStyle: 'italic', marginTop: 40 }}>No transmissions found in this sector.</div>
+                ) : (
+                  broadcasts.map(b => (
+                    <div key={b.id} style={{ background: 'rgba(0,0,0,0.3)', borderRadius: 16, padding: 24, borderLeft: '4px solid var(--tertiary)', border: '1px solid rgba(255,255,255,0.05)', position: 'relative' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 16, borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: 12 }}>
+                         <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--primary)' }}>{b.author}</span>
+                         <span style={{ fontSize: 11, color: 'var(--secondary)', fontFamily: 'var(--font-mono)' }}>
+                            {new Date(b.createdAt).toLocaleDateString()} @ {new Date(b.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                         </span>
+                      </div>
+                      <div style={{ color: 'var(--on-surface)', fontSize: 15, whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{b.content}</div>
+                    </div>
+                  ))
                 )}
              </div>
+
+             {/* ADMIN EVENT POST BOX */}
+             {mRole === 'ADMIN' && (
+               <div style={{ padding: 24, background: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                  <form onSubmit={handleBroadcast} style={{ display: 'flex', gap: 12 }}>
+                    <input 
+                      type="text" 
+                      value={broadcastInput}
+                      onChange={e => setBroadcastInput(e.target.value)}
+                      placeholder="Transmit new event..."
+                      style={{ flex: 1, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '12px 20px', color: 'var(--on-surface)', fontSize: 14, outline: 'none' }}
+                      onFocus={e => { e.target.style.borderColor = 'var(--tertiary)'; }}
+                      onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; }}
+                    />
+                    <button type="submit" disabled={!broadcastInput.trim()} style={{ padding: '0 24px', background: 'var(--tertiary)', color: 'var(--on-tertiary)', fontWeight: 700, fontSize: 14, borderRadius: 12, border: 'none', cursor: broadcastInput.trim() ? 'pointer' : 'not-allowed', opacity: broadcastInput.trim() ? 1 : 0.5, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                      Transmit
+                    </button>
+                  </form>
+               </div>
+             )}
           </div>
 
-          {/* RIGHT SIDE: DISCORD STYLE CHAT */}
-          <div className="w-1/2 flex flex-col h-full bg-[#36393f] border-l border-[#202225] relative">
+          {/* RIGHT SIDE: CHAT */}
+          <div style={{ flex: '2 1 500px', display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(40px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 24, overflow: 'hidden', maxHeight: '80vh' }}>
              
-             {/* Chat Header inside the chat box */}
-             <div className="py-4 px-6 border-b border-[#202225] shadow-sm flex flex-col bg-[#36393f] z-10 shrink-0">
-               <h3 className="text-white font-bold flex items-center gap-2 text-xl tracking-tight">
-                 <span className="text-[#8e9297] text-2xl font-light">#</span> general-chat
+             {/* Chat Header */}
+             <div style={{ padding: '24px 32px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+               <h3 style={{ color: 'var(--on-surface)', fontWeight: 700, fontSize: 20, display: 'flex', alignItems: 'center', gap: 12, letterSpacing: '-0.02em' }}>
+                 <span className="material-symbols-outlined" style={{ color: 'var(--primary)' }}>forum</span> Alliance Comms
                </h3>
-               <p className="text-xs text-[#b9bbbe] mt-1 pl-6">Welcome to the beginning of the #{nodeData?.name} channel.</p>
+               <p style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginTop: 8 }}>Encrypted peer-to-peer transmission channel.</p>
              </div>
 
              {/* Chat Log */}
-             <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+             <div style={{ flex: 1, overflowY: 'auto', padding: 32, display: 'flex', flexDirection: 'column', gap: 24 }}>
                {chatLog.length === 0 ? (
-                 <div className="my-auto text-center text-[#72767d]">Say hello to the community!</div>
+                 <div style={{ margin: 'auto', textAlign: 'center', color: 'var(--on-surface-variant)', fontStyle: 'italic', fontSize: 14 }}>Initialize communications...</div>
                ) : (
                  chatLog.map((chat, i) => {
                    const isMe = chat.username === username;
                    return (
-                     <div key={i} className={`flex gap-4 px-2 py-1 -mx-2 rounded hover:bg-[#32353b] transition-colors`}>
-                       <div className={`w-10 h-10 mt-0.5 shrink-0 rounded-full flex items-center justify-center text-white font-bold select-none ${isMe ? 'bg-[#5865F2]' : 'bg-[#4f545c]'}`}>
+                     <div key={i} style={{ display: 'flex', gap: 16 }}>
+                       <div style={{ width: 44, height: 44, flexShrink: 0, borderRadius: '50%', background: isMe ? 'var(--primary)' : 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isMe ? 'var(--on-primary)' : 'var(--on-surface)', fontWeight: 700, fontSize: 18 }}>
                          {chat.username.charAt(0).toUpperCase()}
                        </div>
-                       <div className="flex flex-col min-w-0 flex-1">
-                         <div className="flex items-baseline gap-2">
-                           <span className={`text-[15px] font-semibold cursor-pointer hover:underline ${isMe ? 'text-white' : 'text-[#f2f3f5]'}`}>{chat.username}</span>
-                           <span className="text-xs text-[#72767d] font-semibold">
+                       <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
+                         <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 4 }}>
+                           <span style={{ fontSize: 15, fontWeight: 700, color: isMe ? 'var(--primary)' : 'var(--on-surface)' }}>{chat.username}</span>
+                           <span style={{ fontSize: 11, color: 'var(--secondary)', fontFamily: 'var(--font-mono)' }}>
                              {new Date(chat.timestamp || Date.now()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                            </span>
                          </div>
-                         <div className="text-[#dcddde] text-[15px] leading-relaxed break-words">{chat.message}</div>
+                         <div style={{ color: 'var(--on-surface-variant)', fontSize: 15, lineHeight: 1.6, wordBreak: 'break-word', background: isMe ? 'rgba(194,196,232,0.05)' : 'transparent', padding: isMe ? '12px 16px' : 0, borderRadius: isMe ? '0 16px 16px 16px' : 0, border: isMe ? '1px solid rgba(194,196,232,0.1)' : 'none' }}>
+                           {chat.message}
+                         </div>
                        </div>
                      </div>
                    );
@@ -311,15 +316,22 @@ export default function HubDashboard({ params }: { params: Promise<{ code: strin
              </div>
 
              {/* Chat Input */}
-             <form onSubmit={sendChat} className="mt-auto px-4 relative mb-6 shrink-0">
-               <input 
-                 type="text" 
-                 value={chatInput}
-                 onChange={e => setChatInput(e.target.value)}
-                 className="w-full bg-[#383a40] rounded-lg px-4 py-3 placeholder-[#72767d] outline-none text-[#dcddde]"
-                 placeholder={`Message #general-chat`}
-               />
-             </form>
+             <div style={{ padding: 24, background: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+               <form onSubmit={sendChat} style={{ display: 'flex' }}>
+                 <div style={{ position: 'relative', width: '100%' }}>
+                   <span className="material-symbols-outlined" style={{ position: 'absolute', left: 20, top: '50%', transform: 'translateY(-50%)', color: 'var(--on-surface-variant)', fontSize: 20 }}>chat</span>
+                   <input 
+                     type="text" 
+                     value={chatInput}
+                     onChange={e => setChatInput(e.target.value)}
+                     style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, padding: '16px 20px 16px 56px', color: 'var(--on-surface)', fontSize: 15, outline: 'none' }}
+                     placeholder="Transmit to alliance..."
+                     onFocus={e => { e.target.style.borderColor = 'var(--primary)'; }}
+                     onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; }}
+                   />
+                 </div>
+               </form>
+             </div>
           </div>
        </div>
     </div>
