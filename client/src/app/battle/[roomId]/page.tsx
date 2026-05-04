@@ -539,7 +539,7 @@ export default function BattlePage() {
               <span className="hidden md:inline text-xs text-outline tracking-wider font-mono">Chars: {myCode.length}</span>
               <select value={myLang} onChange={e => setMyLang(e.target.value)}
                 className="px-2 py-1 bg-white/5 border border-white/10 text-on-surface rounded-md font-mono text-xs outline-none cursor-pointer">
-                {LANGUAGES.map(l => <option key={l} value={l}>{l}</option>)}
+                {LANGUAGES.map(l => <option key={l} value={l} className="bg-[#131315] text-[#c2c4e8]">{l}</option>)}
               </select>
             </div>
           </div>
