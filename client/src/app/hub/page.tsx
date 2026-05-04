@@ -3,324 +3,211 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function HubScanner() {
+function TopNav({ active }: { active: string }) {
+  const router = useRouter();
+  const links = [{ id: 'arena', label: 'Arena', path: '/' }, { id: 'rankings', label: 'Rankings', path: '/leaderboard' }, { id: 'career', label: 'Career', path: '/career' }, { id: 'hub', label: 'Hub', path: '/hub' }];
+  return (
+    <header style={{ position: 'fixed', top: 0, width: '100%', zIndex: 50, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 32px', height: 80, background: 'rgba(14,14,16,0.60)', backdropFilter: 'blur(40px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+      <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em', color: '#A7A9CC', fontStyle: 'italic', cursor: 'pointer' }} onClick={() => router.push('/')}>Clashvers</div>
+      <nav style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+        {links.map(link => { const isActive = active === link.id; return (<a key={link.id} onClick={() => router.push(link.path)} style={{ letterSpacing: '-0.01em', fontWeight: 500, cursor: 'pointer', textDecoration: 'none', color: isActive ? 'var(--primary)' : 'var(--on-surface-variant)', background: isActive ? 'rgba(167,169,204,0.1)' : 'transparent', padding: isActive ? '8px 16px' : '8px 0', borderRadius: isActive ? 9999 : 0 }} onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = 'var(--on-surface)'; }} onMouseLeave={e => { if (!isActive) e.currentTarget.style.color = 'var(--on-surface-variant)'; }}>{link.label}</a>); })}
+      </nav>
+      <button onClick={() => router.push('/')} style={{ padding: '10px 24px', background: 'var(--primary)', color: 'var(--on-primary)', fontSize: 14, fontWeight: 600, border: 'none', borderRadius: 10, cursor: 'pointer' }}>Battle Now</button>
+    </header>
+  );
+}
+
+export default function HubPage() {
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
-  // 'root' | 'create' | 'join'
   const [mode, setMode] = useState<'root' | 'create' | 'join'>('root');
-
-  // Create Mode State
   const [newCommName, setNewCommName] = useState('');
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
-
-  // Join Mode State
   const [communities, setCommunities] = useState<any[]>([]);
-  const [selectedComm, setSelectedComm] = useState<any>(null); // the community they clicked 'join' on
+  const [selectedComm, setSelectedComm] = useState<any>(null);
   const [credentialInput, setCredentialInput] = useState('');
-
   const API_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
 
   useEffect(() => {
-    const savedUserId = localStorage.getItem('cw_userId');
-    if (savedUserId) setUserId(savedUserId);
-    else setError('AUTH_ERR: No active session. Return to lobby.');
+    const uid = localStorage.getItem('cw_userId');
+    if (uid) setUserId(uid);
+    else setError('You must log in first.');
   }, []);
 
-  // --- CREATE FLOW ---
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!userId || !newCommName.trim()) return;
-    
-    setLoading(true);
-    setError('');
-
+    setLoading(true); setError('');
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '';
-    for (let i = 0; i < 8; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
-
+    let code = ''; for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
     try {
-      const res = await fetch(`${API_URL}/api/nodes/create`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, code, name: newCommName.trim() })
-      });
-
+      const res = await fetch(`${API_URL}/api/nodes/create`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId, code, name: newCommName.trim() }) });
       const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || 'Network connection failed.');
-        setLoading(false);
-        return;
-      }
-
-      setGeneratedCode(code);
-      setLoading(false);
-    } catch {
-      setError('CRITICAL: Server unreachable.');
-      setLoading(false);
-    }
+      if (!res.ok) { setError(data.error || 'Failed'); setLoading(false); return; }
+      setGeneratedCode(code); setLoading(false);
+    } catch { setError('Server unreachable'); setLoading(false); }
   }
 
-  // --- JOIN FLOW ---
   async function fetchCommunities(uid: string) {
     setLoading(true);
-    try {
-      const res = await fetch(`${API_URL}/api/nodes?userId=${uid}`);
-      const data = await res.json();
-      if (res.ok) {
-        setCommunities(data);
-      }
-    } catch {
-      setError('Failed to fetch node registry.');
-    } finally {
-      setLoading(false);
-    }
+    try { const res = await fetch(`${API_URL}/api/nodes?userId=${uid}`); const data = await res.json(); if (res.ok) setCommunities(data); } catch { }
+    setLoading(false);
   }
 
   useEffect(() => {
-    if (mode === 'join' && userId) {
-      fetchCommunities(userId);
-      setSelectedComm(null);
-      setCredentialInput('');
-      setError('');
-    } else if (mode === 'create') {
-      setNewCommName('');
-      setGeneratedCode(null);
-      setError('');
-    }
+    if (mode === 'join' && userId) { fetchCommunities(userId); setSelectedComm(null); setCredentialInput(''); setError(''); }
+    else if (mode === 'create') { setNewCommName(''); setGeneratedCode(null); setError(''); }
   }, [mode]);
 
   async function handleJoinSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!userId || !selectedComm || !credentialInput.trim()) return;
-
-    setLoading(true);
-    setError('');
-
+    if (!userId || !credentialInput.trim()) return;
+    setLoading(true); setError('');
+    const cleanCode = credentialInput.trim().toUpperCase();
     try {
-      const cleanCode = credentialInput.trim().toUpperCase();
-      const res = await fetch(`${API_URL}/api/nodes/join`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, code: cleanCode })
-      });
-
+      const res = await fetch(`${API_URL}/api/nodes/join`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId, code: cleanCode }) });
       const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || 'Join Failed. Incorrect Credential.');
-        setLoading(false);
-        return;
-      }
-
+      if (!res.ok) { setError(data.error || 'Invalid credential'); setLoading(false); return; }
       router.push(`/hub/${cleanCode}`);
-    } catch {
-      setError('CRITICAL: Server unreachable.');
-      setLoading(false);
-    }
+    } catch { setError('Server unreachable'); setLoading(false); }
   }
 
-  // --- RENDERERS ---
-  const renderRoot = () => (
-    <div className="flex flex-col items-center gap-12 w-full max-w-lg">
-      <div className="text-center">
-        <div className="text-6xl font-black tracking-widest font-mono mb-2 text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-          COMMUNITY
-        </div>
-        <div className="text-[12px] tracking-[0.6em] uppercase font-mono" style={{ color: 'var(--text-muted)' }}>
-          Select Network Action
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-6 w-full">
-        <button
-          onClick={() => setMode('create')}
-          disabled={!userId}
-          className="w-full py-6 font-mono font-black text-white text-xl tracking-[0.3em] uppercase transition-all hover:bg-green-500/10 border disabled:opacity-30 disabled:hover:bg-transparent"
-          style={{ borderColor: 'rgba(0,204,106,0.4)', background: 'linear-gradient(90deg, rgba(0,204,106,0.1), transparent)' }}
-        >
-          CREATE
-        </button>
-        <button
-          onClick={() => setMode('join')}
-          disabled={!userId}
-          className="w-full py-6 font-mono font-black text-white text-xl tracking-[0.3em] uppercase transition-all hover:bg-blue-500/10 border disabled:opacity-30 disabled:hover:bg-transparent"
-          style={{ borderColor: 'rgba(0,106,204,0.4)', background: 'linear-gradient(90deg, transparent, rgba(0,106,204,0.1))' }}
-        >
-          JOIN
-        </button>
-      </div>
-{error && <div className="text-red-500 text-xs font-mono tracking-widest">{error}</div>}
-    </div>
-  );
-
-  const renderCreate = () => (
-    <div className="flex flex-col items-center w-full max-w-xl gap-8">
-      <div className="w-full text-left font-mono mb-4 text-xs tracking-widest text-slate-500 cursor-pointer hover:text-white transition-colors" onClick={() => setMode('root')}>
-        &lt;&lt; BACK TO DIRECTORY
-      </div>
-
-      {!generatedCode ? (
-        <>
-          <div className="text-3xl font-black tracking-widest font-mono text-white w-full text-center">INITIALIZE NODE</div>
-          <form onSubmit={handleCreate} className="w-full flex flex-col gap-6 p-8 border bg-black/40" style={{ borderColor: 'rgba(0,204,106,0.3)' }}>
-            <div className="flex flex-col gap-2">
-              <label className="text-xs uppercase tracking-widest font-mono text-green-500">Community Name</label>
-              <input
-                type="text"
-                maxLength={30}
-                required
-                placeholder="e.g. ALPHA SQUAD"
-                value={newCommName}
-                onChange={e => setNewCommName(e.target.value.toUpperCase())}
-                disabled={loading}
-                className="w-full px-6 py-4 text-xl tracking-[0.2em] font-mono font-bold text-white outline-none uppercase transition-all bg-black"
-                style={{ border: '1px solid rgba(255,255,255,0.1)' }}
-                onFocus={e => e.target.style.borderColor = '#00ff88'}
-                onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
-              />
-            </div>
-            {error && <div className="text-[10px] font-mono text-red-500 p-3 bg-red-500/10 border border-red-500/30">{error}</div>}
-            <button
-              type="submit"
-              disabled={loading || !newCommName.trim()}
-              className="w-full py-4 font-mono font-bold text-white text-base tracking-[0.2em] uppercase transition-all hover:brightness-125 disabled:opacity-30"
-              style={{ background: '#00cc6a', boxShadow: '0 0 20px rgba(0,204,106,0.2)' }}
-            >
-              {loading ? 'PROCESSING...' : 'INITIALIZE'}
-            </button>
-          </form>
-        </>
-      ) : (
-        <div className="w-full flex flex-col items-center gap-6 p-8 border bg-green-500/5 shadow-[0_0_30px_rgba(0,204,106,0.1)]" style={{ borderColor: '#00cc6a' }}>
-           <div className="text-green-500 animate-pulse font-mono flex items-center gap-2">
-             <div className="w-2 h-2 bg-green-500 rounded-full" /> NODE SECURED
-           </div>
-           
-           <div className="text-center font-mono text-slate-400 text-xs">Transmit this exact Credential to your recruits.</div>
-           <div className="text-5xl font-black font-mono tracking-widest text-white border-y border-dashed py-6 w-full text-center" style={{ borderColor: 'rgba(0,204,106,0.4)' }}>
-             {generatedCode}
-           </div>
-
-           <button
-             onClick={() => router.push(`/hub/${generatedCode}`)}
-             className="w-full py-4 mt-6 font-mono font-bold text-black text-base tracking-[0.2em] uppercase transition-all hover:brightness-125"
-             style={{ background: '#00cc6a' }}
-           >
-             ENTER COMMAND CENTER
-           </button>
-        </div>
-      )}
-    </div>
-  );
-
-  const renderJoin = () => {
-    if (selectedComm) {
-      return (
-        <div className="flex flex-col items-center w-full max-w-xl gap-8">
-           <div className="w-full text-left font-mono mb-4 text-xs tracking-widest text-slate-500 cursor-pointer hover:text-white transition-colors" onClick={() => setSelectedComm(null)}>
-             &lt;&lt; BACK TO LIST
-           </div>
-           
-           <div className="text-3xl font-black tracking-widest font-mono text-white w-full text-center">JOIN: {selectedComm.name}</div>
-           
-           <form onSubmit={handleJoinSubmit} className="w-full flex flex-col gap-6 p-8 border bg-black/40" style={{ borderColor: 'rgba(0,106,204,0.3)' }}>
-              <div className="flex flex-col gap-2">
-                <label className="text-xs uppercase tracking-widest font-mono text-blue-400">Node Credential Code</label>
-                <input
-                  type="text"
-                  maxLength={8}
-                  placeholder="Enter 8-char code"
-                  value={credentialInput}
-                  onChange={e => setCredentialInput(e.target.value.toUpperCase())}
-                  disabled={loading}
-                  className="w-full px-6 py-4 text-2xl tracking-[0.3em] font-mono font-bold text-center text-white outline-none uppercase transition-all bg-black"
-                  style={{ border: '1px solid rgba(255,255,255,0.1)' }}
-                  onFocus={e => e.target.style.borderColor = '#00aaff'}
-                  onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
-                />
-              </div>
-              {error && <div className="text-[10px] font-mono text-red-500 p-3 bg-red-500/10 border border-red-500/30">{error}</div>}
-              <button
-                type="submit"
-                disabled={loading || credentialInput.length !== 8}
-                className="w-full py-4 font-mono font-bold text-white text-base tracking-[0.2em] uppercase transition-all hover:brightness-125 disabled:opacity-30"
-                style={{ background: '#0066cc', boxShadow: '0 0 20px rgba(0,106,204,0.2)' }}
-              >
-                {loading ? 'VERIFYING...' : 'DECRYPT & ENTER'}
-              </button>
-           </form>
-        </div>
-      );
-    }
-
-    return (
-      <div className="flex flex-col items-center w-full max-w-4xl h-full py-12 gap-6">
-        <div className="w-full flex justify-between items-end border-b pb-4 px-2" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
-           <div className="text-2xl font-black tracking-widest font-mono text-white">PUBLIC DIRECTORY</div>
-           <div className="text-xs tracking-widest text-slate-500 cursor-pointer hover:text-white" onClick={() => setMode('root')}>&lt;&lt; HOME</div>
-        </div>
-
-        <div className="w-full flex-1 min-h-0 overflow-auto flex flex-col gap-3 font-mono p-2">
-           {loading ? (
-             <div className="text-slate-500 text-sm animate-pulse tracking-widest">SCANNING NETWORK...</div>
-           ) : communities.length === 0 ? (
-             <div className="text-slate-500 text-sm tracking-widest">NO EXTERNAL NODES FOUND.</div>
-           ) : (
-             communities.map(comm => (
-               <div key={comm.id} className="flex items-center justify-between p-5 border bg-black/50 hover:bg-white/5 transition-colors" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-                 <div className="flex flex-col gap-1">
-                   <div className="text-white font-bold tracking-widest text-lg">{comm.name}</div>
-                   <div className="text-[10px] text-slate-500">INIT: {new Date(comm.created_at).toLocaleDateString()}</div>
-                 </div>
-                 <button 
-                   onClick={() => {
-                     if (comm.isMember && comm.code) {
-                        router.push(`/hub/${comm.code}`);
-                     } else {
-                        setSelectedComm(comm);
-                     }
-                   }}
-                   className={`px-6 py-3 border text-xs font-bold tracking-widest uppercase transition-all ${
-                     comm.isMember 
-                       ? 'text-green-400 hover:bg-green-500/20 border-green-500/40' 
-                       : 'text-blue-400 hover:bg-blue-500/20 border-blue-500/40'
-                   }`}
-                 >
-                   {comm.isMember ? 'ENTER NODE' : 'CONNECT'}
-                 </button>
-               </div>
-             ))
-           )}
-        </div>
-      </div>
-    );
+  const inputStyle: React.CSSProperties = {
+    width: '100%', padding: '14px 18px',
+    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: 12, color: 'var(--on-surface)',
+    fontFamily: 'var(--font-sans)', fontSize: 15, outline: 'none',
+    transition: 'border-color 0.2s, box-shadow 0.2s',
   };
 
   return (
-    <div className="h-full flex flex-col items-center justify-center relative overflow-hidden text-white" style={{ background: '#050505' }}>
-      <div className="absolute inset-0 grid-bg opacity-10 pointer-events-none" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-64 blur-[120px] rounded-full pointer-events-none transition-all duration-1000" 
-           style={{ background: mode === 'create' ? 'rgba(0,204,106,0.05)' : mode === 'join' ? 'rgba(0,106,204,0.05)' : 'rgba(255,255,255,0.02)' }} />
+    <div style={{ minHeight: '100vh', background: 'var(--background)', overflow: 'auto' }}>
+      <TopNav active="hub" />
+      <div className="grid-bg" style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }} />
 
-      {mode === 'root' && (
-        <div className="absolute top-6 left-6 z-50">
-          <button
-            onClick={() => router.push('/')}
-            className="px-5 py-2.5 font-mono text-xs border transition-all hover:text-white uppercase tracking-widest bg-black/40"
-            style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}
-          >
-            &lt; ABORT UPLINK
-          </button>
+      <main style={{ paddingTop: 120, paddingBottom: 80, paddingLeft: 32, paddingRight: 32, maxWidth: 900, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: 56 }}>
+          <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--secondary)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16 }}>◈ ALLIANCE NETWORK</div>
+          <h1 style={{ fontSize: 64, fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--on-surface)', lineHeight: 1, fontStyle: 'italic', marginBottom: 16 }}>Alliance Hub</h1>
+          <p style={{ fontSize: 16, color: 'var(--on-surface-variant)' }}>Create or join a community node to coordinate with your team.</p>
         </div>
-      )}
 
-      <div className="relative z-10 flex flex-col items-center w-full h-full justify-center">
-        {mode === 'root' && renderRoot()}
-        {mode === 'create' && renderCreate()}
-        {mode === 'join' && renderJoin()}
-      </div>
+        {!userId ? (
+          <div className="glass-panel" style={{ borderRadius: 24, padding: '48px', textAlign: 'center' }}>
+            <p style={{ color: 'var(--on-surface-variant)', marginBottom: 24 }}>You must be logged in to access the Alliance Hub.</p>
+            <button onClick={() => router.push('/')} style={{ padding: '14px 36px', background: 'var(--primary)', color: 'var(--on-primary)', fontSize: 15, fontWeight: 600, border: 'none', borderRadius: 12, cursor: 'pointer' }}>Login to Arena</button>
+          </div>
+        ) : mode === 'root' ? (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+            {[
+              { mode: 'create' as const, icon: 'add_circle', title: 'Create Node', desc: 'Initialize a new community node and generate a credential code to invite your allies.', cta: 'Create Alliance', accent: 'var(--tertiary)' },
+              { mode: 'join' as const, icon: 'sensor_occupied', title: 'Join Network', desc: 'Enter a credential code to join an existing alliance or browse the public directory.', cta: 'Browse Alliances', accent: 'var(--primary)' },
+            ].map(card => (
+              <div key={card.mode} className="glass-panel" style={{ borderRadius: 24, padding: '40px', display: 'flex', flexDirection: 'column', gap: 16, cursor: 'pointer', transition: 'background 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}>
+                <div style={{ width: 48, height: 48, borderRadius: 14, background: `rgba(167,169,204,0.1)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 24, color: card.accent }}>{card.icon}</span>
+                </div>
+                <h3 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--on-surface)' }}>{card.title}</h3>
+                <p style={{ fontSize: 14, color: 'var(--on-surface-variant)', lineHeight: 1.6 }}>{card.desc}</p>
+                <button onClick={() => setMode(card.mode)} style={{ marginTop: 8, padding: '14px 24px', background: 'var(--primary)', color: 'var(--on-primary)', fontSize: 14, fontWeight: 600, border: 'none', borderRadius: 10, cursor: 'pointer', alignSelf: 'flex-start' }}>
+                  {card.cta} →
+                </button>
+              </div>
+            ))}
+          </div>
+
+        ) : mode === 'create' ? (
+          <div style={{ maxWidth: 540, margin: '0 auto' }}>
+            <button onClick={() => setMode('root')} style={{ marginBottom: 24, background: 'none', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', gap: 6 }}>← Back</button>
+            {!generatedCode ? (
+              <div className="glass-panel" style={{ borderRadius: 24, padding: '40px 36px' }}>
+                <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--on-surface)', marginBottom: 24 }}>Initialize Node</h2>
+                <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: 'var(--on-surface-variant)', marginBottom: 8 }}>Community Name</label>
+                    <input type="text" maxLength={30} required placeholder="e.g. ALPHA SQUAD" value={newCommName} onChange={e => setNewCommName(e.target.value)} disabled={loading} style={inputStyle}
+                      onFocus={e => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 1px var(--primary)'; }}
+                      onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; e.target.style.boxShadow = 'none'; }} />
+                  </div>
+                  {error && <div style={{ fontSize: 13, color: 'var(--error)', background: 'rgba(255,180,171,0.08)', border: '1px solid rgba(255,180,171,0.2)', borderRadius: 10, padding: '10px 14px' }}>{error}</div>}
+                  <button type="submit" disabled={loading || !newCommName.trim()} style={{ padding: '15px', background: 'var(--primary)', color: 'var(--on-primary)', fontSize: 15, fontWeight: 600, border: 'none', borderRadius: 12, cursor: 'pointer', opacity: loading || !newCommName.trim() ? 0.5 : 1 }}>
+                    {loading ? 'Creating...' : 'Initialize Node'}
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <div className="glass-panel" style={{ borderRadius: 24, padding: '40px 36px', textAlign: 'center' }}>
+                <div style={{ fontSize: 40, marginBottom: 16 }}>✅</div>
+                <h2 style={{ fontSize: 22, fontWeight: 700, color: 'var(--on-surface)', marginBottom: 8 }}>Node Secured</h2>
+                <p style={{ fontSize: 14, color: 'var(--on-surface-variant)', marginBottom: 32 }}>Share this credential with your allies to grant access.</p>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 36, fontWeight: 700, letterSpacing: '0.2em', color: 'var(--on-surface)', padding: '24px', background: 'rgba(255,255,255,0.04)', borderRadius: 16, border: '1px solid rgba(255,255,255,0.1)', marginBottom: 24 }}>
+                  {generatedCode}
+                </div>
+                <button onClick={() => router.push(`/hub/${generatedCode}`)} style={{ padding: '15px 40px', background: 'var(--primary)', color: 'var(--on-primary)', fontSize: 15, fontWeight: 600, border: 'none', borderRadius: 12, cursor: 'pointer' }}>
+                  Enter Command Center →
+                </button>
+              </div>
+            )}
+          </div>
+
+        ) : (
+          /* Join */
+          <div style={{ maxWidth: 700, margin: '0 auto' }}>
+            <button onClick={() => setMode('root')} style={{ marginBottom: 24, background: 'none', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', gap: 6 }}>← Back</button>
+            {!selectedComm ? (
+              <>
+                <h2 style={{ fontSize: 22, fontWeight: 700, color: 'var(--on-surface)', marginBottom: 24, letterSpacing: '-0.02em' }}>Public Directory</h2>
+                {loading ? (
+                  <div style={{ textAlign: 'center', padding: 40, color: 'var(--secondary)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>SCANNING NETWORK...</div>
+                ) : communities.length === 0 ? (
+                  <div className="glass-panel" style={{ borderRadius: 20, padding: '60px', textAlign: 'center', color: 'var(--secondary)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>No public nodes found.</div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {communities.map(comm => (
+                      <div key={comm.id} className="glass-panel" style={{ borderRadius: 16, padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'background 0.15s', cursor: 'default' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}>
+                        <div>
+                          <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--on-surface)', letterSpacing: '-0.01em' }}>{comm.name}</div>
+                          <div style={{ fontSize: 11, color: 'var(--secondary)', fontFamily: 'var(--font-mono)', marginTop: 4 }}>INIT: {new Date(comm.created_at).toLocaleDateString()}</div>
+                        </div>
+                        <button onClick={() => comm.isMember && comm.code ? router.push(`/hub/${comm.code}`) : setSelectedComm(comm)}
+                          style={{ padding: '10px 20px', background: comm.isMember ? 'rgba(74,222,128,0.1)' : 'var(--primary)', color: comm.isMember ? '#4ade80' : 'var(--on-primary)', fontSize: 13, fontWeight: 600, border: comm.isMember ? '1px solid rgba(74,222,128,0.3)' : 'none', borderRadius: 10, cursor: 'pointer' }}>
+                          {comm.isMember ? 'Enter →' : 'Request Access'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div style={{ maxWidth: 480, margin: '0 auto' }}>
+                <button onClick={() => setSelectedComm(null)} style={{ marginBottom: 24, background: 'none', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer', fontSize: 14 }}>← Back to Directory</button>
+                <div className="glass-panel" style={{ borderRadius: 24, padding: '40px 36px' }}>
+                  <h2 style={{ fontSize: 22, fontWeight: 700, color: 'var(--on-surface)', marginBottom: 6 }}>Join: {selectedComm.name}</h2>
+                  <p style={{ fontSize: 14, color: 'var(--on-surface-variant)', marginBottom: 28 }}>Enter the 8-character credential code provided by the node administrator.</p>
+                  <form onSubmit={handleJoinSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    <input type="text" maxLength={8} placeholder="Credential Code" value={credentialInput} onChange={e => setCredentialInput(e.target.value.toUpperCase())} disabled={loading}
+                      style={{ ...inputStyle, textAlign: 'center', fontSize: 22, fontFamily: 'var(--font-mono)', letterSpacing: '0.3em', fontWeight: 700 }}
+                      onFocus={e => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 1px var(--primary)'; }}
+                      onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; e.target.style.boxShadow = 'none'; }} />
+                    {error && <div style={{ fontSize: 13, color: 'var(--error)', background: 'rgba(255,180,171,0.08)', border: '1px solid rgba(255,180,171,0.2)', borderRadius: 10, padding: '10px 14px' }}>{error}</div>}
+                    <button type="submit" disabled={loading || credentialInput.length !== 8} style={{ padding: '15px', background: 'var(--primary)', color: 'var(--on-primary)', fontSize: 15, fontWeight: 600, border: 'none', borderRadius: 12, cursor: 'pointer', opacity: loading || credentialInput.length !== 8 ? 0.5 : 1 }}>
+                      {loading ? 'Verifying...' : 'Enter Alliance →'}
+                    </button>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
     </div>
   );
 }

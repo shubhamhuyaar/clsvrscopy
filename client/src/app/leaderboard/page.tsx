@@ -3,20 +3,39 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-interface PlayerProfile {
-  id: string;
-  username: string;
-  elo: number;
-  wins: number;
-  losses: number;
-  avatar_url: string | null;
+interface Player { id: string; username: string; elo: number; wins: number; losses: number; }
+
+function TopNav({ active }: { active: string }) {
+  const router = useRouter();
+  const links = [
+    { id: 'arena', label: 'Arena', path: '/' },
+    { id: 'rankings', label: 'Rankings', path: '/leaderboard' },
+    { id: 'career', label: 'Career', path: '/career' },
+    { id: 'hub', label: 'Hub', path: '/hub' },
+  ];
+  return (
+    <header style={{ position: 'fixed', top: 0, width: '100%', zIndex: 50, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 32px', height: 80, background: 'rgba(14,14,16,0.60)', backdropFilter: 'blur(40px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+      <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em', color: '#A7A9CC', fontStyle: 'italic', cursor: 'pointer' }} onClick={() => router.push('/')}>Clashvers</div>
+      <nav style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+        {links.map(link => {
+          const isActive = active === link.id;
+          return (
+            <a key={link.id} onClick={() => router.push(link.path)} style={{ fontFamily: 'var(--font-sans)', letterSpacing: '-0.01em', fontWeight: 500, cursor: 'pointer', textDecoration: 'none', color: isActive ? 'var(--primary)' : 'var(--on-surface-variant)', background: isActive ? 'rgba(167,169,204,0.1)' : 'transparent', padding: isActive ? '8px 16px' : '8px 0', borderRadius: isActive ? 9999 : 0 }}
+              onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = 'var(--on-surface)'; }}
+              onMouseLeave={e => { if (!isActive) e.currentTarget.style.color = 'var(--on-surface-variant)'; }}
+            >{link.label}</a>
+          );
+        })}
+      </nav>
+      <button onClick={() => router.push('/')} style={{ padding: '10px 24px', background: 'var(--primary)', color: 'var(--on-primary)', fontFamily: 'var(--font-sans)', fontSize: 14, fontWeight: 600, border: 'none', borderRadius: 10, cursor: 'pointer', letterSpacing: '-0.01em' }}>Battle Now</button>
+    </header>
+  );
 }
 
-const PAGE_SIZE = 15;
+const PAGE_SIZE = 10;
 
 export default function LeaderboardPage() {
-  const router = useRouter();
-  const [players, setPlayers] = useState<PlayerProfile[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [page, setPage] = useState(0);
@@ -24,143 +43,154 @@ export default function LeaderboardPage() {
   useEffect(() => {
     const API_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
     fetch(`${API_URL}/leaderboard`, { cache: 'no-store' })
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to load leaderboard');
-        return res.json();
-      })
-      .then(data => {
-        setPlayers(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError(err.message);
-        setLoading(false);
-      });
+      .then(r => { if (!r.ok) throw new Error('Failed'); return r.json(); })
+      .then(d => { setPlayers(d); setLoading(false); })
+      .catch(e => { setError(e.message); setLoading(false); });
   }, []);
 
-  const totalPages = Math.max(1, Math.ceil(players.length / PAGE_SIZE));
-  const pagePlayers = players.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  const totalPages = Math.max(1, Math.ceil(Math.max(0, players.length - 3) / PAGE_SIZE));
+  const top3 = players.slice(0, 3);
+  const rest = players.slice(3);
+  const pageRows = rest.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   return (
-    <div className="h-full grid-bg flex flex-col items-center relative py-12 overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
-      {/* Background glow orbs */}
-      <div className="absolute top-10 left-10 w-96 h-96 bg-red-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-96 h-96 bg-red-800/10 rounded-full blur-3xl pointer-events-none" />
+    <div style={{ minHeight: '100vh', background: 'var(--background)', overflow: 'auto' }}>
+      <TopNav active="rankings" />
+      <div className="grid-bg" style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }} />
+      <div style={{ position: 'fixed', top: '20%', left: '50%', transform: 'translateX(-50%)', width: 800, height: 400, background: 'radial-gradient(circle, rgba(220,197,145,0.05) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
 
-      <div className="relative z-10 w-full max-w-7xl px-4 flex flex-col items-center flex-1 min-h-0">
-        <h1 className="text-4xl font-bold mb-2">
-          <span className="text-white">Global</span>{' '}
-          <span style={{ color: 'var(--accent-purple)' }}>Leaderboard</span>
-        </h1>
-        <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
-          Top clashvers Players by ELO Rating
-        </p>
+      <main style={{ paddingTop: 128, paddingBottom: 160, paddingLeft: 32, paddingRight: 32, maxWidth: 1280, margin: '0 auto', position: 'relative', zIndex: 1 }}>
 
-        <button
-          onClick={() => router.push('/')}
-          className="absolute top-0 left-4 px-4 py-2 text-xs font-bold rounded-lg border transition-colors hover:bg-white/5"
-          style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}
-        >
-          ← Back to Lobby
-        </button>
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: 64 }}>
+          <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--secondary)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16 }}>◈ GLOBAL COMPETITION</div>
+          <h1 style={{ fontSize: 72, fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--on-surface)', lineHeight: 1, fontStyle: 'italic' }}>Rankings</h1>
+          <p style={{ fontSize: 16, color: 'var(--on-surface-variant)', marginTop: 16 }}>Top players ranked by Combat Rating</p>
+        </div>
 
         {loading ? (
-          <div className="w-8 h-8 border-2 border-red-400/30 border-t-red-400 rounded-full animate-spin mt-10" />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, paddingTop: 80 }}>
+            <div style={{ width: 32, height: 32, border: '2px solid rgba(167,169,204,0.2)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+            <span style={{ color: 'var(--on-surface-variant)', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: '0.1em' }}>LOADING...</span>
+          </div>
         ) : error ? (
-          <p className="text-red-400 bg-red-400/10 px-4 py-2 border border-red-500/20 rounded-lg">{error}</p>
+          <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--error)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>{error}</div>
         ) : (
           <>
-            <div className="w-full rounded-xl overflow-hidden shadow-2xl flex-1 min-h-0" style={{ border: '1px solid var(--border)', background: 'var(--bg-card)' }}>
-              <table className="w-full table-fixed text-left text-base text-slate-300 h-full">
-                <thead className="text-sm uppercase bg-black/40 border-b" style={{ borderColor: 'var(--border)' }}>
-                  <tr>
-                    <th className="px-6 py-4 font-mono w-20 text-center">Rank</th>
-                    <th className="px-6 py-4 font-mono">Player</th>
-                    <th className="px-6 py-4 font-mono text-center">ELO Rating</th>
-                    <th className="px-6 py-4 font-mono text-center">Win Rate</th>
-                    <th className="px-6 py-4 font-mono text-center">Record (W-L)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pagePlayers.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="px-6 py-8 text-center text-slate-500 italic">
-                        No ranked players yet.
-                      </td>
-                    </tr>
-                  ) : (
-                    pagePlayers.map((p, idx) => {
-                      const globalIdx = page * PAGE_SIZE + idx;
-                      const totalMatches = p.wins + p.losses;
-                      const winRate = totalMatches > 0 ? Math.round((p.wins / totalMatches) * 100) : 0;
+            {/* ── Podium ── exact Stitch pedestal layout */}
+            {top3.length > 0 && (
+              <section style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: 32, marginBottom: 96, height: 440 }}>
+                {/* Rank 2 */}
+                {top3[1] && (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div style={{ marginBottom: 24, position: 'relative' }}>
+                      <div style={{ width: 96, height: 96, borderRadius: '50%', overflow: 'hidden', border: '2px solid var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface)', fontSize: 32 }}>🥈</div>
+                      <div style={{ position: 'absolute', bottom: -8, right: 0, width: 32, height: 32, borderRadius: '50%', background: 'var(--primary)', color: 'var(--on-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14 }}>2</div>
+                    </div>
+                    <div className="glass-panel pedestal-glow-silver" style={{ width: 192, height: 224, borderRadius: '24px 24px 0 0', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 32, gap: 4 }}>
+                      <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--on-surface)', letterSpacing: '-0.01em' }}>{top3[1].username}</span>
+                      <span style={{ fontSize: 13, color: 'var(--secondary)', fontFamily: 'var(--font-mono)' }}>{top3[1].elo.toLocaleString()} CR</span>
+                    </div>
+                  </div>
+                )}
 
-                      let rankBadge = <span className="text-slate-400 font-bold">#{globalIdx + 1}</span>;
-                      if (globalIdx === 0) rankBadge = <span className="text-yellow-400 text-lg">🥇</span>;
-                      else if (globalIdx === 1) rankBadge = <span className="text-slate-300 text-lg">🥈</span>;
-                      else if (globalIdx === 2) rankBadge = <span className="text-amber-600 text-lg">🥉</span>;
+                {/* Rank 1 — tallest, offset up */}
+                {top3[0] && (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', transform: 'translateY(-32px)' }}>
+                    <div style={{ marginBottom: 24, position: 'relative' }}>
+                      <div style={{ width: 128, height: 128, borderRadius: '50%', overflow: 'hidden', border: '4px solid var(--tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface)', fontSize: 44 }}>🏆</div>
+                      <div style={{ position: 'absolute', bottom: -12, right: 8, width: 40, height: 40, borderRadius: '50%', background: 'var(--tertiary)', color: 'var(--on-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 18 }}>1</div>
+                    </div>
+                    <div className="glass-panel pedestal-glow-gold" style={{ width: 240, height: 320, borderRadius: '40px 40px 0 0', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 40, gap: 6 }}>
+                      <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--on-surface)', letterSpacing: '-0.02em' }}>{top3[0].username}</span>
+                      <span style={{ fontSize: 16, color: 'var(--tertiary)', fontFamily: 'var(--font-mono)' }}>{top3[0].elo.toLocaleString()} CR</span>
+                      <div style={{ marginTop: 12, display: 'flex', gap: 12, fontSize: 12, color: 'var(--on-surface-variant)', fontFamily: 'var(--font-mono)' }}>
+                        <span style={{ color: '#4ade80' }}>{top3[0].wins}W</span>
+                        <span>—</span>
+                        <span style={{ color: 'var(--error)' }}>{top3[0].losses}L</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
-                      return (
-                        <tr
-                          key={p.id}
-                          className="border-b last:border-0 hover:bg-white/5 transition-colors"
-                          style={{ borderColor: 'var(--border)' }}
-                        >
-                          <td className="px-6 py-6 text-center">{rankBadge}</td>
-                          <td className="px-6 py-6 font-bold text-white">
-                            <div className="flex items-center gap-3">
-                              <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: 'var(--accent-purple)' }} />
-                              <span className="text-xl tracking-wide">{p.username}</span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-6 text-center font-mono font-bold" style={{ color: 'var(--accent-green)' }}>
-                            {p.elo}
-                          </td>
-                          <td className="px-6 py-6 text-center">
-                            <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                              <div className="bg-red-500 h-1.5 rounded-full" style={{ width: `${winRate}%` }} />
-                            </div>
-                            <span className="text-xs text-slate-400 block mt-2">{winRate}%</span>
-                          </td>
-                          <td className="px-6 py-6 text-center font-mono text-sm">
-                            <span className="text-green-400">{p.wins}</span>
-                            {' — '}
-                            <span className="text-red-400">{p.losses}</span>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
+                {/* Rank 3 */}
+                {top3[2] && (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div style={{ marginBottom: 24, position: 'relative' }}>
+                      <div style={{ width: 96, height: 96, borderRadius: '50%', overflow: 'hidden', border: '2px solid var(--tertiary-container)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface)', fontSize: 32 }}>🥉</div>
+                      <div style={{ position: 'absolute', bottom: -8, right: 0, width: 32, height: 32, borderRadius: '50%', background: 'var(--tertiary-container)', color: 'var(--on-tertiary-container)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14 }}>3</div>
+                    </div>
+                    <div className="glass-panel pedestal-glow-bronze" style={{ width: 192, height: 176, borderRadius: '24px 24px 0 0', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 32, gap: 4 }}>
+                      <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--on-surface)', letterSpacing: '-0.01em' }}>{top3[2].username}</span>
+                      <span style={{ fontSize: 13, color: 'var(--tertiary-container)', fontFamily: 'var(--font-mono)' }}>{top3[2].elo.toLocaleString()} CR</span>
+                    </div>
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* ── Table ── exact Stitch grid layout */}
+            <section className="glass-panel" style={{ maxWidth: 900, margin: '0 auto', borderRadius: 24, overflow: 'hidden', boxShadow: '0 25px 50px rgba(0,0,0,0.4)' }}>
+              {/* Table header */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 6fr 2fr 3fr', padding: '24px 40px', borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)' }}>
+                {['Rank', 'Player', 'Win Rate', 'Combat Rating'].map((h, i) => (
+                  <div key={h} style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--secondary)', fontWeight: 700, textAlign: i >= 2 ? 'right' : 'left' }}>{h}</div>
+                ))}
+              </div>
+
+              {players.length === 0 ? (
+                <div style={{ padding: '80px', textAlign: 'center', color: 'var(--secondary)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>No ranked players yet.</div>
+              ) : (
+                pageRows.map((p, idx) => {
+                  const globalRank = 3 + page * PAGE_SIZE + idx + 1;
+                  const total = p.wins + p.losses;
+                  const wr = total > 0 ? ((p.wins / total) * 100).toFixed(1) : '0.0';
+                  return (
+                    <div key={p.id} style={{ display: 'grid', gridTemplateColumns: '1fr 6fr 2fr 3fr', padding: '20px 40px', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.1s', cursor: 'default' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                      <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--secondary)', fontSize: 14 }}>#{String(globalRank).padStart(2, '0')}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                        <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
+                          {['👾', '🤖', '💻', '⚡', '🔥'][globalRank % 5]}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 600, color: 'var(--on-surface)', letterSpacing: '-0.01em' }}>{p.username}</div>
+                          <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--secondary)', letterSpacing: '0.08em', marginTop: 2 }}>
+                            {globalRank <= 10 ? 'Elite Guard' : globalRank <= 50 ? 'Veteran' : 'Recruit'}
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--secondary)', textAlign: 'right' }}>{wr}%</div>
+                      <div style={{ fontWeight: 800, fontSize: 18, color: 'var(--on-surface)', textAlign: 'right', letterSpacing: '-0.02em' }}>{p.elo.toLocaleString()}</div>
+                    </div>
+                  );
+                })
+              )}
+            </section>
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center gap-4 mt-5 shrink-0">
-                <button
-                  onClick={() => setPage(p => Math.max(0, p - 1))}
-                  disabled={page === 0}
-                  className="px-5 py-2 rounded-lg font-bold text-sm border transition-all disabled:opacity-30 hover:bg-white/5"
-                  style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}
-                >
-                  ← Prev
-                </button>
-                <span className="text-sm font-mono" style={{ color: 'var(--text-muted)' }}>
-                  Page <span className="text-white font-bold">{page + 1}</span> / {totalPages}
-                </span>
-                <button
-                  onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
-                  disabled={page === totalPages - 1}
-                  className="px-5 py-2 rounded-lg font-bold text-sm border transition-all disabled:opacity-30 hover:bg-white/5"
-                  style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}
-                >
-                  Next →
-                </button>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginTop: 40 }}>
+                <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
+                  style={{ padding: '10px 24px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: 'var(--on-surface-variant)', cursor: page === 0 ? 'not-allowed' : 'pointer', opacity: page === 0 ? 0.3 : 1, fontFamily: 'var(--font-sans)', fontSize: 13 }}>← Prev</button>
+                <span style={{ padding: '10px 20px', color: 'var(--on-surface-variant)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>{page + 1} / {totalPages}</span>
+                <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page === totalPages - 1}
+                  style={{ padding: '10px 24px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: 'var(--on-surface-variant)', cursor: page === totalPages - 1 ? 'not-allowed' : 'pointer', opacity: page === totalPages - 1 ? 0.3 : 1, fontFamily: 'var(--font-sans)', fontSize: 13 }}>Next →</button>
               </div>
             )}
           </>
         )}
-      </div>
+      </main>
+
+      <footer style={{ padding: '24px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(15,15,16,0.2)', backdropFilter: 'blur(20px)', borderTop: '1px solid rgba(255,255,255,0.05)', position: 'relative', zIndex: 1 }}>
+        <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--secondary)' }}>© 2024 CLASHVERS. PROTOCOL INITIATED.</div>
+        <div style={{ display: 'flex', gap: 32 }}>
+          {['Privacy Grid', 'Terms of Combat', 'API Access', 'Neural Link'].map(l => (<a key={l} href="#" style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--outline)', textDecoration: 'none', letterSpacing: '0.08em' }}>{l}</a>))}
+        </div>
+        <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(116,118,143,0.5)', fontFamily: 'var(--font-mono)' }}>CLASHV.SYS</div>
+      </footer>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
