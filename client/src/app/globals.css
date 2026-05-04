@@ -84,3 +84,32 @@ body {
   direction: ltr;
   -webkit-font-smoothing: antialiased;
 }
+
+/* Responsive visibility */
+.hide-on-mobile { display: flex; }
+.hide-on-desktop { display: none; }
+
+@media (max-width: 768px) {
+  .hide-on-mobile { display: none !important; }
+  .hide-on-desktop { display: flex !important; }
+}
+
+/* Podium Responsive Order */
+.podium-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 32px;
+  margin-bottom: 96px;
+}
+.podium-rank-1 { order: 1; z-index: 10; }
+.podium-rank-2 { order: 2; }
+.podium-rank-3 { order: 3; }
+
+@media (min-width: 768px) {
+  .podium-container { min-height: 440px; }
+  .podium-rank-1 { order: 2; }
+  .podium-rank-2 { order: 1; }
+  .podium-rank-3 { order: 3; }
+}

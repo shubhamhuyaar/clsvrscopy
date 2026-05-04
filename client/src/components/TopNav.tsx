@@ -23,13 +23,13 @@ export function TopNav({ active }: { active: string }) {
         backdropFilter: 'blur(40px)',
         borderBottom: '1px solid rgba(255,255,255,0.05)',
       }}>
-        <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em', color: '#A7A9CC', fontStyle: 'italic', cursor: 'pointer' }}
-          onClick={() => router.push('/')}>
+        <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em', color: '#A7A9CC', fontStyle: 'italic', cursor: 'pointer', zIndex: 60 }}
+          onClick={() => { setMenuOpen(false); router.push('/'); }}>
           Clashvers
         </div>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hide-on-mobile" style={{ alignItems: 'center', gap: 32 }}>
           {links.map(link => {
             const isActive = active === link.id;
             return (
@@ -51,10 +51,10 @@ export function TopNav({ active }: { active: string }) {
         </nav>
 
         {/* Desktop Action & Mobile Toggle */}
-        <div className="flex items-center gap-4">
-          <button className="hidden md:block" onClick={() => router.push('/')} style={{ padding: '10px 24px', background: 'var(--primary)', color: 'var(--on-primary)', fontFamily: 'var(--font-sans)', fontSize: 14, fontWeight: 600, border: 'none', borderRadius: 10, cursor: 'pointer', letterSpacing: '-0.01em' }}>Battle Now</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, zIndex: 60 }}>
+          <button className="hide-on-mobile" onClick={() => router.push('/')} style={{ padding: '10px 24px', background: 'var(--primary)', color: 'var(--on-primary)', fontFamily: 'var(--font-sans)', fontSize: 14, fontWeight: 600, border: 'none', borderRadius: 10, cursor: 'pointer', letterSpacing: '-0.01em' }}>Battle Now</button>
           
-          <button className="md:hidden flex justify-center items-center w-10 h-10 rounded-lg bg-white/5 border border-white/10 text-white" onClick={() => setMenuOpen(!menuOpen)}>
+          <button className="hide-on-desktop" style={{ justifyContent: 'center', alignItems: 'center', width: 40, height: 40, borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', cursor: 'pointer' }} onClick={() => setMenuOpen(!menuOpen)}>
             <span className="material-symbols-outlined">{menuOpen ? 'close' : 'menu'}</span>
           </button>
         </div>
@@ -62,19 +62,19 @@ export function TopNav({ active }: { active: string }) {
 
       {/* Mobile Menu Window */}
       {menuOpen && (
-        <div className="md:hidden fixed inset-0 z-40 bg-black/80 backdrop-blur-md pt-24 px-6 flex flex-col gap-6" onClick={() => setMenuOpen(false)}>
-           <div className="flex flex-col gap-2 bg-[#131315] p-6 rounded-3xl border border-white/10 shadow-2xl" onClick={e => e.stopPropagation()}>
-              <h2 className="text-white/50 uppercase text-[10px] tracking-widest font-bold mb-2 ml-2">Navigation</h2>
+        <div className="hide-on-desktop" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 40, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(16px)', paddingTop: 100, paddingLeft: 24, paddingRight: 24, flexDirection: 'column', gap: 24 }} onClick={() => setMenuOpen(false)}>
+           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, background: '#131315', padding: 24, borderRadius: 24, border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }} onClick={e => e.stopPropagation()}>
+              <h2 style={{ color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', fontSize: 10, letterSpacing: '0.15em', fontWeight: 700, marginBottom: 8, marginLeft: 8 }}>Navigation</h2>
               {links.map(link => {
                 const isActive = active === link.id;
                 return (
                   <button key={link.id} onClick={() => { setMenuOpen(false); router.push(link.path); }}
-                    className={`text-left p-4 rounded-2xl text-lg font-bold transition-all ${isActive ? 'bg-[#A7A9CC]/10 text-[#c2c4e8]' : 'text-gray-300 hover:bg-white/5'}`}>
+                    style={{ textAlign: 'left', padding: 16, borderRadius: 16, fontSize: 18, fontWeight: 700, transition: 'all 0.2s', border: 'none', cursor: 'pointer', background: isActive ? 'rgba(167,169,204,0.1)' : 'transparent', color: isActive ? '#c2c4e8' : 'rgba(255,255,255,0.8)' }}>
                     {link.label}
                   </button>
                 );
               })}
-              <button onClick={() => { setMenuOpen(false); router.push('/'); }} className="mt-4 p-4 rounded-2xl text-[#131315] font-bold text-lg text-center" style={{background: '#c2c4e8'}}>
+              <button onClick={() => { setMenuOpen(false); router.push('/'); }} style={{ marginTop: 16, padding: 16, borderRadius: 16, background: '#c2c4e8', color: '#131315', fontWeight: 700, fontSize: 18, textAlign: 'center', border: 'none', cursor: 'pointer' }}>
                 Battle Now
               </button>
            </div>

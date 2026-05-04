@@ -54,54 +54,81 @@ export default function LeaderboardPage() {
           <>
             {/* ── Podium ── exact Stitch pedestal layout */}
             {top3.length > 0 && (
-              <section style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-end', gap: 32, marginBottom: 96, minHeight: 440 }}>
-                {/* Rank 2 */}
-                {top3[1] && (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <div style={{ marginBottom: 24, position: 'relative' }}>
-                      <div style={{ width: 96, height: 96, borderRadius: '50%', overflow: 'hidden', border: '2px solid var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface)', fontSize: 32 }}>🥈</div>
-                      <div style={{ position: 'absolute', bottom: -8, right: 0, width: 32, height: 32, borderRadius: '50%', background: 'var(--primary)', color: 'var(--on-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14 }}>2</div>
-                    </div>
-                    <div className="glass-panel pedestal-glow-silver" style={{ width: 192, height: 224, borderRadius: '24px 24px 0 0', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 32, gap: 4 }}>
-                      <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--on-surface)', letterSpacing: '-0.01em' }}>{top3[1].username}</span>
-                      <span style={{ fontSize: 13, color: 'var(--secondary)', fontFamily: 'var(--font-mono)' }}>{top3[1].elo.toLocaleString()} CR</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Rank 1 — tallest, offset up */}
-                {top3[0] && (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', transform: 'translateY(-32px)' }}>
-                    <div style={{ marginBottom: 24, position: 'relative' }}>
-                      <div style={{ width: 128, height: 128, borderRadius: '50%', overflow: 'hidden', border: '4px solid var(--tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface)', fontSize: 44 }}>🏆</div>
-                      <div style={{ position: 'absolute', bottom: -12, right: 8, width: 40, height: 40, borderRadius: '50%', background: 'var(--tertiary)', color: 'var(--on-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 18 }}>1</div>
-                    </div>
-                    <div className="glass-panel pedestal-glow-gold" style={{ width: 240, height: 320, borderRadius: '40px 40px 0 0', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 40, gap: 6 }}>
-                      <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--on-surface)', letterSpacing: '-0.02em' }}>{top3[0].username}</span>
-                      <span style={{ fontSize: 16, color: 'var(--tertiary)', fontFamily: 'var(--font-mono)' }}>{top3[0].elo.toLocaleString()} CR</span>
-                      <div style={{ marginTop: 12, display: 'flex', gap: 12, fontSize: 12, color: 'var(--on-surface-variant)', fontFamily: 'var(--font-mono)' }}>
-                        <span style={{ color: '#4ade80' }}>{top3[0].wins}W</span>
-                        <span>—</span>
-                        <span style={{ color: 'var(--error)' }}>{top3[0].losses}L</span>
+              <div style={{ marginBottom: 96 }}>
+                {/* ── Desktop Podium ── */}
+                <section className="podium-container hide-on-mobile">
+                  {/* Rank 1 — tallest, offset up */}
+                  {top3[0] && (
+                    <div className="podium-rank-1" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', transform: 'translateY(-32px)' }}>
+                      <div style={{ marginBottom: 24, position: 'relative' }}>
+                        <div style={{ width: 128, height: 128, borderRadius: '50%', overflow: 'hidden', border: '4px solid var(--tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface)', fontSize: 44 }}>🏆</div>
+                        <div style={{ position: 'absolute', bottom: -12, right: 8, width: 40, height: 40, borderRadius: '50%', background: 'var(--tertiary)', color: 'var(--on-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 18 }}>1</div>
+                      </div>
+                      <div className="glass-panel pedestal-glow-gold" style={{ width: 240, height: 320, borderRadius: '40px 40px 0 0', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 40, gap: 6 }}>
+                        <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--on-surface)', letterSpacing: '-0.02em' }}>{top3[0].username}</span>
+                        <span style={{ fontSize: 16, color: 'var(--tertiary)', fontFamily: 'var(--font-mono)' }}>{top3[0].elo.toLocaleString()} CR</span>
+                        <div style={{ marginTop: 12, display: 'flex', gap: 12, fontSize: 12, color: 'var(--on-surface-variant)', fontFamily: 'var(--font-mono)' }}>
+                          <span style={{ color: '#4ade80' }}>{top3[0].wins}W</span>
+                          <span>—</span>
+                          <span style={{ color: 'var(--error)' }}>{top3[0].losses}L</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Rank 3 */}
-                {top3[2] && (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <div style={{ marginBottom: 24, position: 'relative' }}>
-                      <div style={{ width: 96, height: 96, borderRadius: '50%', overflow: 'hidden', border: '2px solid var(--tertiary-container)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface)', fontSize: 32 }}>🥉</div>
-                      <div style={{ position: 'absolute', bottom: -8, right: 0, width: 32, height: 32, borderRadius: '50%', background: 'var(--tertiary-container)', color: 'var(--on-tertiary-container)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14 }}>3</div>
+                  {/* Rank 2 */}
+                  {top3[1] && (
+                    <div className="podium-rank-2" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <div style={{ marginBottom: 24, position: 'relative' }}>
+                        <div style={{ width: 96, height: 96, borderRadius: '50%', overflow: 'hidden', border: '2px solid var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface)', fontSize: 32 }}>🥈</div>
+                        <div style={{ position: 'absolute', bottom: -8, right: 0, width: 32, height: 32, borderRadius: '50%', background: 'var(--primary)', color: 'var(--on-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14 }}>2</div>
+                      </div>
+                      <div className="glass-panel pedestal-glow-silver" style={{ width: 192, height: 224, borderRadius: '24px 24px 0 0', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 32, gap: 4 }}>
+                        <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--on-surface)', letterSpacing: '-0.01em' }}>{top3[1].username}</span>
+                        <span style={{ fontSize: 13, color: 'var(--secondary)', fontFamily: 'var(--font-mono)' }}>{top3[1].elo.toLocaleString()} CR</span>
+                      </div>
                     </div>
-                    <div className="glass-panel pedestal-glow-bronze" style={{ width: 192, height: 176, borderRadius: '24px 24px 0 0', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 32, gap: 4 }}>
-                      <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--on-surface)', letterSpacing: '-0.01em' }}>{top3[2].username}</span>
-                      <span style={{ fontSize: 13, color: 'var(--tertiary-container)', fontFamily: 'var(--font-mono)' }}>{top3[2].elo.toLocaleString()} CR</span>
+                  )}
+
+                  {/* Rank 3 */}
+                  {top3[2] && (
+                    <div className="podium-rank-3" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <div style={{ marginBottom: 24, position: 'relative' }}>
+                        <div style={{ width: 96, height: 96, borderRadius: '50%', overflow: 'hidden', border: '2px solid var(--tertiary-container)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface)', fontSize: 32 }}>🥉</div>
+                        <div style={{ position: 'absolute', bottom: -8, right: 0, width: 32, height: 32, borderRadius: '50%', background: 'var(--tertiary-container)', color: 'var(--on-tertiary-container)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14 }}>3</div>
+                      </div>
+                      <div className="glass-panel pedestal-glow-bronze" style={{ width: 192, height: 176, borderRadius: '24px 24px 0 0', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 32, gap: 4 }}>
+                        <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--on-surface)', letterSpacing: '-0.01em' }}>{top3[2].username}</span>
+                        <span style={{ fontSize: 13, color: 'var(--tertiary-container)', fontFamily: 'var(--font-mono)' }}>{top3[2].elo.toLocaleString()} CR</span>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </section>
+                  )}
+                </section>
+
+                {/* ── Mobile Top 3 Cards ── */}
+                <section className="hide-on-desktop" style={{ flexDirection: 'column', gap: 16, width: '100%', padding: '0 16px' }}>
+                  {top3.map((player, index) => {
+                    const colors = [
+                      { bg: 'rgba(220, 197, 145, 0.08)', border: 'var(--tertiary)', text: 'var(--tertiary)', icon: '🏆' },
+                      { bg: 'rgba(194, 196, 232, 0.08)', border: 'var(--primary)', text: 'var(--primary)', icon: '🥈' },
+                      { bg: 'rgba(191, 170, 120, 0.08)', border: 'var(--tertiary-container)', text: 'var(--tertiary-container)', icon: '🥉' }
+                    ];
+                    const color = colors[index];
+                    return (
+                      <div key={player.id} className="glass-panel" style={{ display: 'flex', alignItems: 'center', padding: 20, borderRadius: 24, gap: 16, borderLeft: `4px solid ${color.border}`, background: color.bg }}>
+                         <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--surface)', border: `2px solid ${color.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>
+                           {color.icon}
+                         </div>
+                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                           <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--on-surface)', letterSpacing: '-0.01em' }}>{player.username}</span>
+                           <span style={{ fontSize: 13, color: color.text, fontFamily: 'var(--font-mono)' }}>{player.elo.toLocaleString()} CR</span>
+                         </div>
+                         <div style={{ fontSize: 32, fontWeight: 800, color: color.border, opacity: 0.3, fontStyle: 'italic' }}>#{index + 1}</div>
+                      </div>
+                    );
+                  })}
+                </section>
+              </div>
             )}
 
             {/* ── Table ── exact Stitch grid layout */}
