@@ -122,8 +122,8 @@ export default function LeaderboardPage() {
                     const color = colors[index];
                     return (
                       <div key={player.id} className="glass-panel" style={{ display: 'flex', alignItems: 'center', padding: 20, borderRadius: 24, gap: 16, borderLeft: `4px solid ${color.border}`, background: color.bg }}>
-                         <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--surface)', border: `2px solid ${color.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>
-                           {color.icon}
+                         <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--surface)', border: `2px solid ${color.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0, overflow: 'hidden' }}>
+                           {player.avatar_url ? <img src={player.avatar_url} alt={player.username} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : color.icon}
                          </div>
                          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
                            <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--on-surface)', letterSpacing: '-0.01em' }}>{player.username}</span>
