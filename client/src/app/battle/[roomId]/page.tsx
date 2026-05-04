@@ -442,38 +442,27 @@ export default function BattlePage() {
       {FinishModal}
 
       {/* Header */}
-      <header className="flex items-center gap-3 px-5 h-12 shrink-0 z-10" style={{ background: 'rgba(19,19,21,0.95)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-        <span className="font-bold text-sm" style={{ fontFamily: 'var(--font-mono)' }}>
-          <span style={{ color: 'var(--on-surface)' }}>clash</span>
-          <span style={{ color: 'var(--primary)', textShadow: '0 0 12px rgba(0,245,255,0.5)' }}>vers</span>
-        </span>
-        <div className="w-px h-4" style={{ background: 'rgba(255,255,255,0.08)' }} />
-        <span className="text-xs truncate max-w-40" style={{ color: 'var(--on-surface-variant)', fontFamily: 'var(--font-mono)' }}>{gameState.problem?.title ?? '…'}</span>
-
-        <div className="ml-auto flex items-center gap-3">
-          <span className="flex items-center gap-1.5 text-xs" style={{ color: connected ? '#4ade80' : 'var(--error)', fontFamily: 'var(--font-mono)' }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: connected ? '#4ade80' : 'var(--error)', boxShadow: connected ? '0 0 8px rgba(43,255,73,0.8)' : '0 0 8px rgba(255,180,171,0.8)', display: 'inline-block' }} />
+      <header style={{ display:'flex', alignItems:'center', gap:12, padding:'0 20px', height:52, flexShrink:0, zIndex:10, background:'rgba(19,19,21,0.97)', borderBottom:'1px solid rgba(255,255,255,0.08)' }}>
+        <span style={{ fontFamily:'var(--font-sans)', fontWeight:800, fontSize:18, letterSpacing:'-0.03em', fontStyle:'italic', color:'var(--primary)' }}>Clashvers</span>
+        <div style={{ width:1, height:18, background:'rgba(255,255,255,0.1)' }} />
+        <span style={{ fontSize:11, color:'var(--secondary)', fontFamily:'var(--font-mono)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:220 }}>{gameState.problem?.title ?? '…'}</span>
+        <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:12 }}>
+          <span style={{ display:'flex', alignItems:'center', gap:6, fontSize:11, fontFamily:'var(--font-mono)', color: connected ? '#4ade80' : 'var(--error)' }}>
+            <span style={{ width:7, height:7, borderRadius:'50%', background: connected ? '#4ade80' : 'var(--error)', boxShadow: connected ? '0 0 8px rgba(74,222,128,0.8)' : 'none', display:'inline-block' }} />
             {connected ? 'LIVE' : 'OFFLINE'}
           </span>
-
           {gameState.status === 'active' && timeLeft !== null && (
-            <span className="text-sm font-bold tabular-nums" style={{ color: timerColor, fontFamily: 'var(--font-mono)' }}>
-              ⏱ {fmtTime(timeLeft)}
-            </span>
+            <span style={{ fontSize:15, fontWeight:800, fontFamily:'var(--font-mono)', color:timerColor, letterSpacing:'-0.02em' }}>⏱ {fmtTime(timeLeft)}</span>
           )}
-
           {gameState.status === 'active' && (
             <button onClick={requestFinish} disabled={!!gameState.finishPending}
-              className="px-3 py-1 text-xs font-bold disabled:opacity-40"
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: '#4ade80', borderRadius: 'var(--radius)', fontFamily: 'var(--font-mono)' }}>
+              style={{ padding:'6px 14px', background:'rgba(167,169,204,0.1)', border:'1px solid rgba(167,169,204,0.25)', color:'var(--primary)', borderRadius:8, fontFamily:'var(--font-mono)', fontSize:11, fontWeight:700, cursor:'pointer', opacity: gameState.finishPending ? 0.4 : 1 }}>
               🏁 {gameState.finishPending ? 'Pending…' : 'Submit Early'}
             </button>
           )}
-
           {gameState.status === 'active' && (
             <button onClick={requestDraw} disabled={!!gameState.drawPending || gameState.drawAttempts >= 3}
-              className="px-3 py-1 text-xs font-bold disabled:opacity-40"
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--on-surface-variant)', borderRadius: 'var(--radius)', fontFamily: 'var(--font-mono)' }}>
+              style={{ padding:'6px 14px', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'var(--on-surface-variant)', borderRadius:8, fontFamily:'var(--font-mono)', fontSize:11, fontWeight:700, cursor:'pointer', opacity:(gameState.drawPending||gameState.drawAttempts>=3) ? 0.4 : 1 }}>
               🤝 {gameState.drawPending ? 'Pending…' : `Draw (${3 - gameState.drawAttempts})`}
             </button>
           )}
@@ -482,69 +471,64 @@ export default function BattlePage() {
 
       {/* Problem Panel */}
       {problemOpen && gameState.problem && (
-        <div className="shrink-0 px-4 py-3 text-xs overflow-y-auto max-h-36 relative" style={{ background: 'rgba(19,19,21,0.95)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-          <button onClick={() => setProblemOpen(false)} className="absolute top-2 right-3 text-slate-500 hover:text-white">✕</button>
-          <p className="font-semibold text-white mb-1">{gameState.problem.title}</p>
-          <p className="text-slate-400 leading-relaxed mb-2">{gameState.problem.description}</p>
-          <pre className="text-slate-500 font-mono whitespace-pre-wrap">{gameState.problem.examples}</pre>
+        <div style={{ flexShrink:0, maxHeight:160, overflowY:'auto', padding:'12px 20px', position:'relative', background:'rgba(255,255,255,0.02)', borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
+          <button onClick={() => setProblemOpen(false)} style={{ position:'absolute', top:10, right:14, background:'none', border:'none', color:'var(--secondary)', cursor:'pointer', fontSize:14 }}>✕</button>
+          <p style={{ fontWeight:600, color:'var(--on-surface)', marginBottom:6, fontSize:13 }}>{gameState.problem.title}</p>
+          <p style={{ color:'var(--on-surface-variant)', fontSize:12, lineHeight:1.65, marginBottom:8 }}>{gameState.problem.description}</p>
+          <pre style={{ color:'var(--secondary)', fontSize:11, fontFamily:'var(--font-mono)', whiteSpace:'pre-wrap', wordBreak:'break-all', lineHeight:1.5, margin:0 }}>{gameState.problem.examples}</pre>
         </div>
       )}
       {!problemOpen && (
-        <button onClick={() => setProblemOpen(true)} className="shrink-0 px-4 py-1 text-xs text-left hover:text-white transition-colors"
-          style={{ background: 'rgba(19,19,21,0.95)', borderBottom: '1px solid rgba(255,255,255,0.08)', color: 'var(--secondary)' }}>
+        <button onClick={() => setProblemOpen(true)} style={{ flexShrink:0, padding:'5px 20px', textAlign:'left', background:'rgba(255,255,255,0.015)', borderBottom:'1px solid rgba(255,255,255,0.06)', borderTop:'none', borderLeft:'none', borderRight:'none', color:'var(--secondary)', fontSize:11, fontFamily:'var(--font-mono)', cursor:'pointer' }}>
           📋 {gameState.problem?.title} — click to expand
         </button>
       )}
 
-      {/* Error / info banner */}
       {gameState.errorMessage && (
-        <div className="shrink-0 px-4 py-2 text-xs text-center" style={{ background: 'rgba(255,71,87,0.15)', color: 'var(--error)', borderBottom: '1px solid rgba(255,71,87,0.3)' }}>
-          {gameState.errorMessage}
-        </div>
+        <div style={{ flexShrink:0, padding:'5px 20px', fontSize:11, textAlign:'center', background:'rgba(255,180,171,0.08)', color:'var(--error)', borderBottom:'1px solid rgba(255,180,171,0.15)' }}>{gameState.errorMessage}</div>
       )}
       {gameState.isRateLimited && (
-        <div className="shrink-0 px-4 py-1 text-xs text-center" style={{ background: 'rgba(255,165,0,0.1)', color: '#ffa502' }}>⚠ Typing too fast — slowing sync</div>
+        <div style={{ flexShrink:0, padding:'4px 20px', fontSize:11, textAlign:'center', background:'rgba(220,197,145,0.08)', color:'var(--tertiary)' }}>⚠ Typing too fast — slowing sync</div>
       )}
 
-      {/* Editors */}
-      <div className="flex flex-1 min-h-0">
+      {/* Editors row */}
+      <div style={{ flex:1, minHeight:0, display:'flex', overflow:'hidden' }}>
         {/* My Editor */}
-        <div className="flex flex-col flex-1 min-w-0" style={{ borderRight: '2px solid rgba(255,255,255,0.08)' }}>
-          <div className="flex items-center gap-3 px-3 py-1.5 shrink-0" style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-            <span className="w-2 h-2 rounded-full" style={{ background: 'var(--primary)', boxShadow: '0 0 8px rgba(0,245,255,0.7)' }} />
-            <span className="text-xs" style={{ color: 'var(--primary)', fontFamily: 'var(--font-mono)' }}>YOU — {username} {me?.elo ? `[${me.elo} ELO]` : ''}</span>
-            <select value={myLang} onChange={e => setMyLang(e.target.value)} className="ml-auto text-xs px-2 py-0.5 outline-none" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--on-surface)', borderRadius: 'var(--radius)', fontFamily: 'var(--font-mono)' }}>
+        <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', borderRight:'2px solid rgba(255,255,255,0.07)' }}>
+          <div style={{ flexShrink:0, display:'flex', alignItems:'center', gap:10, padding:'8px 14px', background:'rgba(167,169,204,0.04)', borderBottom:'1px solid rgba(255,255,255,0.07)' }}>
+            <span style={{ width:8, height:8, borderRadius:'50%', background:'var(--primary)', boxShadow:'0 0 8px rgba(167,169,204,0.6)', flexShrink:0 }} />
+            <span style={{ fontSize:11, fontFamily:'var(--font-mono)', color:'var(--primary)', fontWeight:700 }}>YOU — {username}{me?.elo ? ` [${me.elo} ELO]` : ''}</span>
+            <select value={myLang} onChange={e => setMyLang(e.target.value)}
+              style={{ marginLeft:'auto', padding:'3px 8px', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', color:'var(--on-surface)', borderRadius:6, fontFamily:'var(--font-mono)', fontSize:11, outline:'none', cursor:'pointer' }}>
               {LANGUAGES.map(l => <option key={l} value={l}>{l}</option>)}
             </select>
           </div>
-          <div className="flex-1 min-h-0">
+          <div style={{ flex:1, minHeight:0 }}>
             <MonacoEditor height="100%" language={myLang} value={myCode} theme="vs-dark" onChange={handleCodeChange} options={editorOptions} />
           </div>
         </div>
 
         {/* Enemy Editor */}
-        <div className="flex flex-col flex-1 min-w-0">
-          <div className="flex items-center gap-3 px-3 py-1.5 shrink-0" style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-            <span className="w-2 h-2 rounded-full" style={{ background: 'var(--tertiary)', boxShadow: '0 0 8px rgba(208,91,255,0.7)' }} />
-            <span className="text-xs" style={{ color: 'var(--tertiary)', fontFamily: 'var(--font-mono)' }}>ENEMY — {opponent?.username ?? 'Unknown'} {opponent?.elo ? `[${opponent.elo} ELO]` : ''}</span>
-            <span className="ml-auto text-xs" style={{ color: 'var(--secondary)' }}>{gameState.opponentCodeLength} chars</span>
+        <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column' }}>
+          <div style={{ flexShrink:0, display:'flex', alignItems:'center', gap:10, padding:'8px 14px', background:'rgba(220,197,145,0.04)', borderBottom:'1px solid rgba(255,255,255,0.07)' }}>
+            <span style={{ width:8, height:8, borderRadius:'50%', background:'var(--tertiary)', boxShadow:'0 0 8px rgba(220,197,145,0.6)', flexShrink:0 }} />
+            <span style={{ fontSize:11, fontFamily:'var(--font-mono)', color:'var(--tertiary)', fontWeight:700 }}>ENEMY — {opponent?.username ?? 'Unknown'}{opponent?.elo ? ` [${opponent.elo} ELO]` : ''}</span>
+            <span style={{ marginLeft:'auto', fontSize:11, fontFamily:'var(--font-mono)', color:'var(--secondary)' }}>{gameState.opponentCodeLength} chars</span>
           </div>
-          <div className="flex-1 min-h-0 relative overflow-hidden">
-            <pre className="absolute inset-0 p-3 text-xs font-mono leading-5 overflow-hidden select-none" style={{ background: '#1e1e1e', color: '#444', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
-              {dummyText}
-            </pre>
+          <div style={{ flex:1, minHeight:0, position:'relative', overflow:'hidden' }}>
+            <pre style={{ position:'absolute', inset:0, padding:12, fontSize:12, fontFamily:'var(--font-mono)', lineHeight:1.5, background:'#1e1e1e', color:'rgba(255,255,255,0.12)', whiteSpace:'pre-wrap', wordBreak:'break-all', margin:0, overflow:'hidden' }}>{dummyText}</pre>
             {!isRevealed && (
-              <div className="absolute inset-0 fog-blur flex flex-col items-center justify-center gap-3" style={{ background: 'rgba(8,8,16,0.5)' }}>
-                <span className="text-4xl">🔒</span>
-                <p className="text-xs font-mono" style={{ color: 'var(--tertiary)' }}>
+              <div style={{ position:'absolute', inset:0, backdropFilter:'blur(10px)', background:'rgba(13,13,15,0.65)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:10 }}>
+                <span style={{ fontSize:36 }}>🔒</span>
+                <p style={{ fontSize:14, fontFamily:'var(--font-mono)', color:'var(--tertiary)', fontWeight:700 }}>
                   {gameState.opponentCodeLength > 0 ? `${gameState.opponentCodeLength} chars` : 'Waiting…'}
                 </p>
-                <p className="text-xs" style={{ color: 'var(--secondary)' }}>Revealed by AI on time's up</p>
+                <p style={{ fontSize:11, color:'var(--secondary)' }}>Revealed by AI on time's up</p>
               </div>
             )}
             {isRevealed && revealedOpponent && (
-              <div className="absolute inset-0">
-                <MonacoEditor height="100%" language={revealedOpponent.language} value={revealedOpponent.code} theme="vs-dark" options={{ ...editorOptions, readOnly: true }} />
+              <div style={{ position:'absolute', inset:0 }}>
+                <MonacoEditor height="100%" language={revealedOpponent.language} value={revealedOpponent.code} theme="vs-dark" options={{ ...editorOptions, readOnly:true }} />
               </div>
             )}
           </div>
@@ -552,20 +536,20 @@ export default function BattlePage() {
       </div>
 
       {/* Chat */}
-      <div className="shrink-0 flex flex-col" style={{ height: 120, borderTop: '1px solid rgba(255,255,255,0.08)', background: 'rgba(19,19,21,0.95)' }}>
-        <div className="flex-1 overflow-y-auto px-3 py-2 flex flex-col gap-1">
+      <div style={{ flexShrink:0, height:112, borderTop:'1px solid rgba(255,255,255,0.07)', background:'rgba(19,19,21,0.9)', display:'flex', flexDirection:'column' }}>
+        <div style={{ flex:1, overflowY:'auto', padding:'6px 14px', display:'flex', flexDirection:'column', gap:3 }}>
           {gameState.chatMessages.map((msg, i) => (
-            <div key={i} className="text-xs break-words">
-              <span style={{ fontFamily: 'var(--font-mono)', color: msg.userId === userId ? 'var(--primary)' : 'var(--tertiary)' }}>{msg.username}: </span>
-              <span style={{ color: 'var(--on-surface)' }} dangerouslySetInnerHTML={{ __html: msg.message }} />
+            <div key={i} style={{ fontSize:12, wordBreak:'break-all' }}>
+              <span style={{ fontFamily:'var(--font-mono)', fontWeight:700, color: msg.userId === userId ? 'var(--primary)' : 'var(--tertiary)' }}>{msg.username}: </span>
+              <span style={{ color:'var(--on-surface-variant)' }} dangerouslySetInnerHTML={{ __html: msg.message }} />
             </div>
           ))}
           <div ref={chatEndRef} />
         </div>
-        <form onSubmit={handleChat} className="flex gap-2 px-3 pb-2">
+        <form onSubmit={handleChat} style={{ display:'flex', gap:8, padding:'0 12px 8px' }}>
           <input value={chatInput} onChange={e => setChatInput(e.target.value)} placeholder="Chat…" maxLength={200}
-            className="flex-1 px-3 py-1.5 text-xs outline-none" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--on-surface)', borderRadius: 'var(--radius)', fontFamily: 'var(--font-mono)' }} />
-          <button type="submit" className="px-3 py-1.5 text-xs font-bold" style={{ background: 'var(--primary)', color: '#131315', borderRadius: 'var(--radius)', fontFamily: 'var(--font-mono)' }}>SEND</button>
+            style={{ flex:1, padding:'7px 12px', fontSize:12, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', color:'var(--on-surface)', borderRadius:8, fontFamily:'var(--font-mono)', outline:'none' }} />
+          <button type="submit" style={{ padding:'7px 18px', background:'var(--primary)', color:'#131315', fontSize:12, fontWeight:700, border:'none', borderRadius:8, cursor:'pointer', fontFamily:'var(--font-mono)', letterSpacing:'0.04em' }}>SEND</button>
         </form>
       </div>
     </div>
